@@ -111,7 +111,7 @@ for guru, sekolah, nama_kelas, hari, jam_mulai, jam_selesai, mode, kegiatan, tip
 
 RequestJadwal.objects.create(
     pengaju=teachers[0],
-    tipe_request='add',
+    request_type='add',
     guru=teachers[0],
     sekolah=schools['bsd'],
     nama_kelas='Coding Trial Class',
@@ -121,6 +121,11 @@ RequestJadwal.objects.create(
     mode='offline',
     kegiatan='mengajar',
     tipe='Trial',
+    tipe_repeat='weekly',
+    pertemuan_per_minggu=1,
+    jam_berangkat_pulang=1,
+    kali_ke_sekolah_per_minggu=1,
+    detail='Request demo untuk menambahkan jadwal trial class.',
     status='pending',
 )
 
