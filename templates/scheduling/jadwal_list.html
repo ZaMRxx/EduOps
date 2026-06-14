@@ -268,14 +268,14 @@
                         <td class="text-end pe-4">
                             <div class="d-inline-flex gap-1">
                                 
-                                <a href="{% url 'jadwal_edit' jadwal.id %}" class="btn btn-outline-teal btn-sm rounded-circle p-2" title="Edit Jadwal">
-                                    <i class="bi bi-pencil-fill" style="font-size: 13px;"></i>
+                                <a href="{% url 'jadwal_edit' jadwal.id %}" class="btn btn-light btn-sm font-xs rounded border table-action-btn" title="Edit Jadwal">
+                                    <i class="bi bi-pencil-square text-teal"></i>
                                 </a>
                                 
                                 
                                 <form method="POST" action="{% url 'jadwal_delete' jadwal.id %}" class="d-inline-block m-0" data-confirm-title="Hapus Jadwal" data-confirm-message="Apakah Anda yakin ingin menghapus jadwal kelas {{ jadwal.nama_kelas|escape }}?" data-confirm-button="Ya, Hapus" data-confirm-class="btn-danger">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-light btn-sm font-xs rounded border" title="Hapus Jadwal">
+                                    <button type="submit" class="btn btn-light btn-sm font-xs rounded border table-action-btn" title="Hapus Jadwal">
                                         <i class="bi bi-trash3 text-danger"></i>
                                     </button>
                                 </form>
