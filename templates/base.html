@@ -341,6 +341,90 @@
                     }
                 });
             });
+
+            function enhanceEduOpsSelect(select) {
+                if (!select || select.dataset.eduopsEnhanced || select.multiple) return;
+                const wrapper = document.createElement('div');
+                wrapper.className = `eduops-select ${select.classList.contains('form-select-sm') ? 'eduops-select-sm' : ''} ${select.disabled ? 'disabled' : ''}`;
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+                select.dataset.eduopsEnhanced = 'true';
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'eduops-select-btn';
+                button.disabled = select.disabled;
+                button.innerHTML = '<span class="eduops-select-label"></span><i class="bi bi-chevron-down eduops-select-chevron"></i>';
+                wrapper.appendChild(button);
+
+                const menu = document.createElement('div');
+                menu.className = 'eduops-select-menu';
+                wrapper.appendChild(menu);
+
+                const label = button.querySelector('.eduops-select-label');
+
+                function selectedOption() {
+                    return select.options[select.selectedIndex] || select.options[0];
+                }
+
+                function syncLabel() {
+                    const option = selectedOption();
+                    label.textContent = option ? option.textContent : 'Pilih';
+                }
+
+                function closeAll() {
+                    document.querySelectorAll('.eduops-select.open').forEach(function(item) {
+                        if (item !== wrapper) item.classList.remove('open');
+                    });
+                }
+
+                function renderOptions() {
+                    menu.innerHTML = '';
+                    Array.from(select.options).forEach(function(option) {
+                        const item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = `eduops-select-option ${option.selected ? 'active' : ''}`;
+                        item.textContent = option.textContent;
+                        item.disabled = option.disabled;
+                        item.addEventListener('click', function() {
+                            select.value = option.value;
+                            Array.from(select.options).forEach(function(opt) {
+                                opt.selected = opt.value === option.value;
+                            });
+                            syncLabel();
+                            wrapper.classList.remove('open');
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        menu.appendChild(item);
+                    });
+                }
+
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    if (select.disabled) return;
+                    closeAll();
+                    renderOptions();
+                    wrapper.classList.toggle('open');
+                });
+
+                select.addEventListener('change', function() {
+                    syncLabel();
+                    renderOptions();
+                });
+
+                syncLabel();
+                renderOptions();
+            }
+
+            document.querySelectorAll('select.form-select').forEach(enhanceEduOpsSelect);
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.eduops-select')) {
+                    document.querySelectorAll('.eduops-select.open').forEach(function(item) {
+                        item.classList.remove('open');
+                    });
+                }
+            });
         });
     </script>
     
