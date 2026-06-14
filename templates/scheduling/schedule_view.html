@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Jadwal Kalender - EduOps Educourse.id{% endblock %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+    
+    body {
+        background: #f4f7f8 !important;
+    }
+    
+    .schedule-header-bar {
+        border: 0;
+        background: rgba(255, 255, 255, 0.78);
+        border-radius: 22px;
+        box-shadow: 0 18px 44px rgba(7, 21, 47, 0.08);
+    }
+    
+    
+    .day-tabs-container {
+        display: flex;
+        border-bottom: 0;
+        background-color: #f2f3f4;
+        border-radius: 999px;
+        padding: 3px;
+        margin-bottom: 0;
+        list-style: none;
+    }
+    
+    .day-tab-link {
+        display: block;
+        padding: 9px 22px;
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        border-radius: 999px;
+        border-bottom: 0;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .day-tab-link:hover {
+        color: #1D9E75;
+    }
+    
+    .day-tab-link.active {
+        color: #07152f;
+        background-color: #ffffff;
+        box-shadow: 0 8px 18px rgba(7, 21, 47, 0.08);
+    }
+    
+    
+    .btn-action-small {
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 500;
+    }
+    
+    
+    .flatpickr-day.selected, .flatpickr-day.selected:hover {
+        background: #1D9E75 !important;
+        border-color: #1D9E75 !important;
+    }
+    .flatpickr-day.inRange {
+        background: rgba(29, 158, 117, 0.15) !important;
+        border-color: transparent !important;
+        box-shadow: -5px 0 0 rgba(29, 158, 117, 0.15), 5px 0 0 rgba(29, 158, 117, 0.15) !important;
+    }
+    .flatpickr-day.inRange:hover {
+        background: rgba(29, 158, 117, 0.25) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0 eduops-operational-shell">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h4 class="fw-bold m-0 text-dark">Jadwal Kalender</h4>
+            <p class="font-sm text-secondary mb-0">Tampilan kalender operasional untuk seluruh pengajar Educourse.id.</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if user.role == 'admin_op' %}
+            <a href="{% url 'jadwal_add' %}" class="btn btn-teal rounded-pill px-4">
+                <i class="bi bi-plus-lg me-1"></i> Jadwal Baru
+            </a>
+            {% endif %}
+            <a href="{% url 'dashboard' %}" class="btn btn-teal rounded-pill px-4">Ringkasan</a>
+        </div>
+    </div>
+
+    
+    <div class="schedule-header-bar py-3 px-4 mb-3">
+        
+        
+        <div class="d-flex align-items-center mb-3">
+            <div class="d-flex gap-2">
+                
+                <a href="{% url 'sekolah_list' %}" class="btn btn-teal btn-action-small px-4">
+                    <i class="bi bi-list-ul me-1"></i> Sekolah
+                </a>
+                
+                <a href="{% url 'request_list' %}" class="btn btn-teal btn-action-small px-4">
+                    <i class="bi bi-check-circle me-1"></i> Pengajuan Jadwal
+                </a>
+                <a href="{% url 'jadwal_list' %}" class="btn btn-teal btn-action-small px-4">
+                    <i class="bi bi-table me-1"></i> Ringkasan Load
+                </a>
+            </div>
+        </div>
+        
+        
+        <form method="GET" action="{% url 'schedule_view' %}" id="filterForm">
+            
+            <input type="hidden" name="hari" id="inputHari" value="{{ active_day }}">
+            
+            
+            <div class="row g-2 align-items-center mb-3">
+                <div class="col-auto">
+                    <h5 class="fw-bold m-0 text-dark d-flex align-items-center">
+                        <i class="bi bi-calendar3 me-2"></i> Jadwal Kalender
+                    </h5>
+                </div>
+                
+                
+                {% if user.role != 'teacher' %}
+                <div class="col-md-2 col-6">
+                    <select name="branch" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Semua Cabang</option>
+                        {% for b in all_branches %}
+                        <option value="{{ b }}" {% if branch_filter == b %}selected{% endif %}>{{ b }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                
+                
+                <div class="col-md-2 col-6">
+                    <select name="tipe" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">Semua Tipe</option>
+                        {% for tipe in all_tipes %}
+                        <option value="{{ tipe }}" {% if tipe_filter == tipe %}selected{% endif %}>{{ tipe }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                {% if user.role != 'teacher' %}
+                <div class="col-md-4 col-12 ms-auto">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light text-secondary"><i class="bi bi-search"></i></span>
+                        <input type="search" name="search_teacher" class="form-control" placeholder="Cari pengajar, sekolah, kelas..." value="{{ search_query }}" autocomplete="off">
+                        <button type="submit" class="btn btn-teal px-3" aria-label="Cari jadwal">
+                            <i class="bi bi-arrow-return-left"></i>
+                        </button>
+                        {% if search_query %}
+                        <a href="?hari={{ active_day }}&tanggal={{ selected_date }}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}" class="btn btn-outline-secondary">Reset</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mt-3">
+                
+                <div class="d-flex align-items-center gap-2">
+                    <strong class="text-dark me-2"><i class="bi bi-calendar-date text-secondary me-2"></i>Tanggal</strong>
+                    
+                    <input type="text" id="weekpicker" class="form-control form-control-sm bg-white" style="width: 260px;" placeholder="Pilih Minggu..." readonly>
+                    
+                    <input type="hidden" name="tanggal" id="datepicker" value="{{ selected_date }}">
+                    <button type="button" class="btn btn-teal btn-sm px-3" onclick="goToToday()">Hari Ini</button>
+                </div>
+                
+                
+                <div>
+                    <ul class="day-tabs-container">
+                        {% for tab in day_tabs %}
+                        <li class="nav-item">
+                            <a href="#" class="day-tab-link {% if tab.is_active %}active{% endif %}" onclick="switchDayAndDate('{{ tab.nama }}', '{{ tab.tanggal }}')">
+                                {{ tab.nama }} <span class="font-xs fw-normal opacity-75">({{ tab.tanggal|slice:"8:10" }}/{{ tab.tanggal|slice:"5:7" }})</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    
+    <div class="schedule-wrapper mx-4">
+        
+        
+        <div class="time-axis">
+            
+            <div style="height: 45px; background-color: #f8fbfc; border-bottom: 1px solid #edf2f5; box-sizing: border-box;"></div>
+            
+            
+            <div class="time-slot">07:00</div>
+            <div class="time-slot">08:00</div>
+            <div class="time-slot">09:00</div>
+            <div class="time-slot">10:00</div>
+            <div class="time-slot">11:00</div>
+            <div class="time-slot">12:00</div>
+            <div class="time-slot">13:00</div>
+            <div class="time-slot">14:00</div>
+            <div class="time-slot">15:00</div>
+            <div class="time-slot">16:00</div>
+            <div class="time-slot">17:00</div>
+            <div class="time-slot">18:00</div>
+            <div class="time-slot">19:00</div>
+            <div class="time-slot">20:00</div>
+            <div class="time-slot">21:00</div>
+            <div class="time-slot">22:00</div>
+        </div>
+        
+        
+        <div class="d-flex flex-grow-1" style="min-height: 1005px;">
+            {% for teacher in teachers %}
+            <div class="teacher-column flex-grow-1" id="teacher-col-{{ teacher.id }}">
+                
+                
+                <div class="teacher-header text-center">
+                    <i class="bi bi-person-fill text-teal me-1"></i> {{ teacher.nama_lengkap|default:teacher.username }}
+                </div>
+                
+                
+                
+                <div class="teacher-grid-body" id="grid-body-{{ teacher.id }}" style="height: 960px;">
+                    
+                </div>
+                
+            </div>
+            {% empty %}
+            
+            <div class="w-100 d-flex flex-column align-items-center justify-content-center text-muted" style="min-height: 300px;">
+                <i class="bi bi-person-x fs-1"></i>
+                <p class="mt-2 font-sm">Tidak ada kolom guru yang sesuai dengan kriteria filter.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+    </div>
+
+</div>
+
+<script id="jadwal-data" type="application/json">
+    {{ jadwal_json|safe }}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="{% static 'js/schedule.js' %}?v={% now 'U' %}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/weekSelect/weekSelect.js"></script>
+
+<script>
+    flatpickr("#weekpicker", {
+        defaultDate: "{{ selected_date }}",
+        plugins: [new weekSelect({})],
+        locale: {
+            firstDayOfWeek: 1
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                const date = selectedDates[0];
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                const formattedDate = `${yyyy}-${mm}-${dd}`;
+                document.getElementById('datepicker').value = formattedDate;
+                document.getElementById('filterForm').submit();
+            }
+        }
+    });
+    function switchDayAndDate(hari, tanggal) {
+        document.getElementById('inputHari').value = hari;
+        document.getElementById('datepicker').value = tanggal;
+        document.getElementById('filterForm').submit();
+    }
+    function goToToday() {
+        const datepicker = document.getElementById('datepicker');
+        datepicker.value = '{{ today_date }}';
+        document.getElementById('inputHari').value = '{{ today_day }}';
+        document.getElementById('filterForm').submit();
+    }
+
+    document.querySelector('input[name="search_teacher"]')?.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            document.getElementById('filterForm').submit();
+        }
+    });
+</script>
+{% endblock %}

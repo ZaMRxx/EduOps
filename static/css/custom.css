@@ -1,0 +1,735 @@
+
+
+:root {
+    --primary-teal: #08aeb3;
+    --primary-teal-hover: #048c91;
+    --primary-teal-light: rgba(8, 174, 179, 0.13);
+    --primary-teal-light-hover: rgba(8, 174, 179, 0.22);
+    --accent-yellow: #ffc400;
+    
+    --bg-light: #eefafa;
+    --border-color: #e8eef2;
+    --text-dark: #07152f;
+    
+    --sidebar-width: 260px;
+    --navbar-height: 72px;
+    --card-radius: 22px;
+    --soft-shadow: 0 18px 44px rgba(7, 21, 47, 0.08);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    padding-top: 0;
+    overflow-x: hidden;
+}
+
+.eduops-body {
+    background:
+        radial-gradient(circle at 10% 5%, rgba(8, 174, 179, 0.11), transparent 26%),
+        linear-gradient(180deg, #f9fefe 0%, #eefafa 48%, #f7fbff 100%);
+}
+
+.text-teal {
+    color: var(--primary-teal) !important;
+}
+
+.bg-teal {
+    background-color: var(--primary-teal) !important;
+    color: #ffffff !important;
+}
+
+.bg-teal-light {
+    background-color: var(--primary-teal-light) !important;
+}
+
+.btn-teal {
+    background-color: var(--primary-teal);
+    color: #ffffff;
+    border: none;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-teal:hover {
+    background-color: var(--primary-teal-hover);
+    color: #ffffff;
+}
+
+.font-sm {
+    font-size: 0.875rem !important; 
+}
+
+.font-xs {
+    font-size: 0.75rem !important; 
+}
+
+.tracking-tight {
+    letter-spacing: 0;
+}
+
+.main-container {
+    display: flex;
+    min-height: calc(100vh - var(--navbar-height));
+    width: 100%;
+    min-width: 0;
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    max-width: min(var(--sidebar-width), 86vw);
+    position: sticky;
+    top: var(--navbar-height);
+    height: calc(100vh - var(--navbar-height));
+    flex: 0 0 var(--sidebar-width);
+    z-index: 1035;
+    overflow-y: auto;
+    background-color: #ffffff;
+    transition: transform 0.3s ease;
+}
+
+.sidebar,
+.sidebar-menu-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar,
+.sidebar-menu-scroll::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+.eduops-topbar {
+    min-height: var(--navbar-height);
+    border-bottom: 1px solid rgba(8, 174, 179, 0.08);
+    box-shadow: 0 10px 30px rgba(7, 21, 47, 0.05);
+    z-index: 1030;
+}
+
+.eduops-mobile-logo img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+}
+
+.topbar-avatar {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: var(--primary-teal-light);
+    color: var(--primary-teal);
+    border: 2px solid rgba(8, 174, 179, 0.18);
+    font-weight: 800;
+    box-shadow: 0 10px 22px rgba(7, 21, 47, 0.08);
+}
+
+.topbar-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.eduops-sidebar {
+    padding-top: 0;
+    background: linear-gradient(180deg, #08aeb3 0%, #06a5aa 58%, #04969b 100%);
+    color: #ffffff;
+    border: 0 !important;
+    box-shadow: 18px 0 42px rgba(7, 21, 47, 0.12);
+    z-index: 1041;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-brand {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    font-weight: 800;
+    font-size: 1.45rem;
+    min-width: 0;
+}
+
+.sidebar-brand span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #ffffff;
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.9rem 1rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    border-radius: 18px !important;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+.sidebar .nav-link.active {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.22);
+    box-shadow: inset 4px 0 0 var(--accent-yellow);
+}
+
+.sidebar .nav-link i {
+    color: #ffffff;
+    font-size: 1.15rem;
+}
+
+.sidebar-menu-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.sidebar-footer {
+    flex: 0 0 auto;
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 800;
+    box-shadow: inset 4px 0 0 var(--accent-yellow);
+    transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.sidebar-logout:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
+}
+
+.content {
+    flex-grow: 1;
+    margin-left: 0;
+    background-color: transparent;
+    min-height: 100%;
+    padding-top: 2rem !important;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.card,
+.dashboard-content-card,
+.sekolah-main-card,
+.request-main-card,
+.card-riwayat,
+.card-absensi {
+    border: 1px solid rgba(8, 174, 179, 0.08) !important;
+    border-radius: var(--card-radius) !important;
+    box-shadow: var(--soft-shadow) !important;
+}
+
+.card-header,
+.card-header-clean {
+    border-top-left-radius: var(--card-radius) !important;
+    border-top-right-radius: var(--card-radius) !important;
+}
+
+.btn {
+    font-weight: 700;
+}
+
+.btn-teal,
+.btn-outline-teal:hover {
+    box-shadow: 0 10px 20px rgba(8, 174, 179, 0.22);
+}
+
+.btn-outline-teal {
+    color: var(--primary-teal);
+    border-color: rgba(8, 174, 179, 0.28);
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+    border-color: #e8eef2;
+    border-radius: 14px;
+}
+
+.input-group .form-control,
+.input-group .input-group-text,
+.input-group .btn {
+    border-radius: 999px;
+}
+
+.table-modern th,
+.table-light th {
+    background-color: #f6fbfb !important;
+    color: #7a8797 !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.text-dark {
+    color: var(--text-dark) !important;
+}
+
+h1 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.sidebar-backdrop {
+    display: none;
+}
+
+.eduops-confirm-modal {
+    border-radius: 28px;
+    box-shadow: 0 28px 80px rgba(7, 21, 47, 0.24);
+    overflow: hidden;
+}
+
+.eduops-confirm-icon {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    background: rgba(8, 174, 179, 0.13);
+    color: var(--primary-teal);
+    font-size: 1.45rem;
+}
+
+.modal-backdrop.show {
+    opacity: 0.42;
+}
+
+@media (min-width: 1200px) {
+    .has-sidebar .eduops-topbar {
+        left: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .eduops-topbar {
+        left: 0;
+        width: 100%;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: var(--navbar-height);
+        bottom: 0;
+        left: 0;
+        height: auto;
+        transform: translateX(-100%);
+    }
+    
+    body.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(7, 21, 47, 0.36);
+        z-index: 1034;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    body.sidebar-open .sidebar-backdrop {
+        display: block;
+        opacity: 1;
+        pointer-events: auto;
+    }
+    
+    .content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100vw;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+}
+
+@media (max-width: 767.98px) {
+    :root {
+        --navbar-height: 64px;
+    }
+
+    .eduops-mobile-logo img {
+        height: 30px;
+        max-width: 160px;
+    }
+
+    .content {
+        padding-top: 1rem !important;
+    }
+
+    h1 {
+        font-size: clamp(2rem, 12vw, 3rem) !important;
+        line-height: 1.05;
+    }
+}
+
+@media (max-width: 420px) {
+    .sidebar-brand {
+        padding-inline: 16px;
+    }
+
+}
+
+.schedule-wrapper {
+    display: flex;
+    overflow-x: auto;
+    background-color: #ffffff;
+    border: 1px solid rgba(8, 174, 179, 0.12);
+    border-radius: 22px;
+    box-shadow: var(--soft-shadow);
+}
+
+.time-axis {
+    min-width: 65px;
+    position: sticky;
+    left: 0;
+    background-color: #f8fbfc;
+    z-index: 10;
+    border-right: 1px solid #edf2f5;
+}
+
+.time-slot {
+    height: 60px; 
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    font-size: 11px;
+    color: #8b96a6;
+    font-weight: 700;
+    padding-top: 4px;
+    border-bottom: 1px solid #edf2f5;
+    box-sizing: border-box !important;
+}
+
+.teacher-column {
+    min-width: 170px;
+    position: relative;
+    border-right: 1px solid #edf2f5;
+}
+
+.teacher-header {
+    height: 45px;
+    background-color: var(--primary-teal);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    box-sizing: border-box !important;
+}
+
+.teacher-header .text-teal {
+    color: #ffffff !important;
+}
+
+.eduops-operational-shell {
+    padding: 18px 18px 32px;
+    border-radius: 28px;
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.72)),
+        radial-gradient(circle at 16% 8%, rgba(8, 174, 179, 0.12), transparent 28%),
+        #f4f7f8;
+}
+
+.eduops-login-panel {
+    max-width: 980px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+    overflow: hidden;
+}
+
+.eduops-login-hero {
+    background: linear-gradient(135deg, rgba(8, 174, 179, 0.15), rgba(255, 196, 0, 0.14));
+    padding: 56px;
+}
+
+.eduops-login-hero img {
+    width: min(260px, 80%);
+    height: auto;
+}
+
+@media (max-width: 767.98px) {
+    .eduops-login-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .eduops-login-hero {
+        padding: 32px;
+    }
+}
+
+.teacher-grid-body {
+    position: relative;
+    background-size: 100% 60px;
+    background-image: linear-gradient(to bottom, #eef3f6 1px, transparent 1px);
+}
+
+.jadwal-card {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    border-radius: 12px;
+    padding: 6px 8px;
+    font-size: 11px;
+    line-height: 1.25;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(7, 21, 47, 0.12);
+    border: 1px solid rgba(7, 21, 47, 0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 44px;
+}
+
+.jadwal-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 20;
+}
+
+.jadwal-card-done {
+    color: #374151;
+    border-color: rgba(107, 114, 128, 0.35) !important;
+    box-shadow: inset 0 0 0 1px rgba(107, 114, 128, 0.14), 0 8px 18px rgba(7, 21, 47, 0.08);
+}
+
+.jadwal-card-done .branch-badge,
+.jadwal-card-done .badge {
+    filter: grayscale(1);
+}
+
+.jadwal-card .branch-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 9px;
+    background-color: rgba(255, 255, 255, 0.55);
+    color: #07152f;
+    padding: 1px 5px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.jadwal-card .time-text {
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 2px;
+}
+
+.jadwal-card .class-name {
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.jadwal-card .badges-row {
+    display: flex;
+    gap: 2px;
+    flex-wrap: nowrap;
+    margin-top: auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.jadwal-card .badge-mode, 
+.jadwal-card .badge-activity,
+.jadwal-card .badges-row .badge {
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: 600;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.jadwal-card .sekolah-name {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.75);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 1400px) {
+    .jadwal-card {
+        font-size: 10px;
+        padding: 5px 6px;
+    }
+
+    .jadwal-card .sekolah-name,
+    .jadwal-card .badges-row .badge {
+        font-size: 8px;
+    }
+}
+
+.jadwal-card.short-card {
+    padding: 2px 4px 18px !important;
+    line-height: 1.1 !important;
+}
+
+.jadwal-card.short-card .branch-badge {
+    top: 2px !important;
+    right: 2px !important;
+    font-size: 8px !important;
+    padding: 0px 2px !important;
+}
+
+.jadwal-card.short-card .time-text {
+    font-size: 8px !important;
+    margin-bottom: 0px !important;
+    line-height: 1.1 !important;
+}
+
+.jadwal-card.short-card .class-name {
+    font-size: 9px !important;
+    margin-top: 1px !important;
+    margin-bottom: 0px !important;
+    line-height: 1.1 !important;
+}
+
+.jadwal-card.short-card .sekolah-name {
+    display: block !important;
+    font-size: 7px !important;
+    line-height: 1 !important;
+    margin: 1px 30px 0 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.jadwal-card.short-card .badges-row {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    bottom: 3px;
+    gap: 1px !important;
+    margin-top: 0 !important;
+    overflow: hidden;
+}
+
+.jadwal-card.short-card .badge-mode,
+.jadwal-card.short-card .badge-activity,
+.jadwal-card.short-card .badge {
+    font-size: 0 !important;
+    line-height: 1 !important;
+    padding: 2px 3px !important;
+    border-radius: 4px !important;
+    flex: 1 1 0;
+    text-align: center;
+}
+
+.jadwal-card.short-card .badge-mode::after,
+.jadwal-card.short-card .badge-activity::after,
+.jadwal-card.short-card .badge::after {
+    content: attr(data-short-label);
+    font-size: 7px;
+}
+
+.jadwal-card.compact-card {
+    padding-bottom: 18px;
+}
+
+.jadwal-card.compact-card .sekolah-name {
+    display: block;
+    font-size: 7.5px !important;
+    line-height: 1 !important;
+    margin: 1px 38px 0 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.jadwal-card.compact-card .branch-badge {
+    max-width: 42px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.jadwal-card.compact-card .badges-row {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 4px;
+    overflow: hidden;
+}
+
+.jadwal-card.compact-card .badge-mode,
+.jadwal-card.compact-card .badge-activity,
+.jadwal-card.compact-card .badge {
+    font-size: 0 !important;
+    line-height: 1 !important;
+    padding: 2px 3px !important;
+    flex: 1 1 0;
+    text-align: center;
+    min-width: 0;
+}
+
+.jadwal-card.compact-card .badge-mode::after,
+.jadwal-card.compact-card .badge-activity::after,
+.jadwal-card.compact-card .badge::after {
+    content: attr(data-short-label);
+    font-size: 7px;
+    white-space: nowrap;
+}
+
+.jadwal-card.short-card.compact-card .branch-badge {
+    top: 2px !important;
+    right: 2px !important;
+    max-width: 34px;
+}
+
+.jadwal-card.short-card.compact-card .badges-row {
+    left: 4px;
+    right: 4px;
+    bottom: 3px;
+}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Masuk - EduOps Educourse.id{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height: 78vh;">
+    <div class="card eduops-login-panel">
+        <div class="eduops-login-hero d-flex flex-column justify-content-between">
+            <div>
+                <img src="{% static 'img/educourse-logo.png' %}" alt="Educourse.id" class="mb-5">
+                <h1 class="fw-bold text-dark mb-3">EduOps</h1>
+                <p class="text-secondary fs-5 mb-0">Aplikasi operasional Educourse.id untuk jadwal, load teacher, request, dan absensi.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap mt-5">
+                <span class="badge bg-teal text-white rounded-pill px-3 py-2">Jadwal Kalender</span>
+                <span class="badge bg-warning text-dark rounded-pill px-3 py-2">Load Pengajar</span>
+                <span class="badge bg-light text-dark border rounded-pill px-3 py-2">Absensi</span>
+            </div>
+        </div>
+        <div class="card-body p-5">
+            
+            
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-teal-light rounded-4 p-3 mb-3" style="width: 68px; height: 68px;">
+                    <i class="bi bi-shield-lock-fill text-teal fs-2"></i>
+                </div>
+                <h4 class="fw-bold tracking-tight text-dark mb-1">Masuk ke EduOps</h4>
+                <p class="text-secondary font-sm">Sistem Operasional Educourse.id</p>
+            </div>
+            
+            
+            <form method="POST" action="{% url 'login' %}">
+                {% csrf_token %} 
+                
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label font-sm fw-semibold text-secondary">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-secondary"></i></span>
+                        <input type="email" name="email" id="email" class="form-control bg-light border-start-0 font-sm" placeholder="Masukkan email" required autocomplete="email">
+                    </div>
+                </div>
+                
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label font-sm fw-semibold text-secondary">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-key text-secondary"></i></span>
+                        <input type="password" name="password" id="password" class="form-control bg-light border-start-0 font-sm" placeholder="Masukkan password" required autocomplete="current-password">
+                        <button class="btn btn-light border" type="button" id="togglePassword" aria-label="Lihat password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="text-end mt-2">
+                        <a href="{% url 'password_reset' %}" class="font-xs text-teal fw-semibold text-decoration-none">Lupa password?</a>
+                    </div>
+                </div>
+                
+                
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-teal py-2.5 rounded-pill fw-semibold font-sm">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Masuk Sekarang
+                    </button>
+                </div>
+            </form>
+            
+            
+            <div class="text-center mt-4">
+                <span class="text-secondary font-xs">
+                    Masalah login? Hubungi <span class="fw-semibold text-teal">Admin Operasional</span>
+                </span>
+                <div class="mt-3 border-top pt-3">
+                    <span class="text-secondary font-sm text-muted">Guru Baru? </span>
+                    <a href="{% url 'register_teacher' %}" class="text-teal font-sm fw-bold text-decoration-none">Daftar Akun Pengajar</a>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('password');
+        const button = document.getElementById('togglePassword');
+        const icon = button?.querySelector('i');
+        button?.addEventListener('click', function() {
+            const visible = input.type === 'text';
+            input.type = visible ? 'password' : 'text';
+            icon.className = visible ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+    });
+</script>
+{% endblock %}

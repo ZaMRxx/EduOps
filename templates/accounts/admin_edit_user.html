@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Akun Pengguna - EduOps Educourse.id{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0" style="max-width: 800px; margin: 0 auto;">
+    
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2 border-bottom pb-3">
+        <div>
+            <h4 class="fw-bold m-0 text-teal">Edit Akun Pengguna: {{ target_user.username }}</h4>
+            <p class="text-secondary font-sm mb-0">Ubah hak akses, detail cabang, status aktif, atau perbarui password pengguna ini.</p>
+        </div>
+        <div>
+            <a href="{% url 'user_list' %}" class="btn btn-light border btn-sm font-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Batal
+            </a>
+        </div>
+    </div>
+    
+    
+    <div class="card shadow-sm border border-light-subtle" style="border-radius: 12px;">
+        <div class="card-header bg-teal-light text-teal p-3" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+            <h5 class="fw-bold m-0 d-flex align-items-center">
+                <i class="bi bi-pencil-square me-2"></i> Formulir Edit Pengguna
+            </h5>
+        </div>
+        <div class="card-body p-4 p-md-5">
+            
+            {% if form.errors %}
+            <div class="alert alert-danger font-sm border-0 shadow-sm mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Mohon perbaiki beberapa kesalahan pengisian form di bawah ini.
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="{% url 'admin_edit_user' target_user.id %}">
+                {% csrf_token %}
+                
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                    <i class="bi bi-shield-lock text-secondary me-1"></i> Data Kredensial & Akses
+                </h6>
+                
+                <div class="row">
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_username" class="form-label font-xs fw-bold text-uppercase text-secondary">Username (Tidak dapat diubah)</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.username.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_role" class="form-label font-xs fw-bold text-uppercase text-secondary">Peran / Role</label>
+                        {{ form.role }}
+                        {% if form.role.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.role.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    
+                    <div class="form-check form-switch">
+                        {{ form.is_active }}
+                        <label class="form-check-label font-sm fw-semibold text-secondary" for="id_is_active">Akun Aktif (Dapat masuk ke sistem)</label>
+                    </div>
+                    {% if form.is_active.errors %}
+                    <div class="text-danger font-xs mt-1">{{ form.is_active.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <h6 class="fw-bold text-dark border-bottom pb-2 mt-4 mb-3">
+                    <i class="bi bi-person-card-text text-secondary me-1"></i> Profil Pengguna
+                </h6>
+                
+                <div class="row">
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_nama_lengkap" class="form-label font-xs fw-bold text-uppercase text-secondary">Nama Lengkap</label>
+                        {{ form.nama_lengkap }}
+                        {% if form.nama_lengkap.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.nama_lengkap.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_email" class="form-label font-xs fw-bold text-uppercase text-secondary">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_no_wa" class="form-label font-xs fw-bold text-uppercase text-secondary">Nomor WhatsApp</label>
+                        {{ form.no_wa }}
+                        {% if form.no_wa.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.no_wa.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_branch" class="form-label font-xs fw-bold text-uppercase text-secondary">Cabang / Branch</label>
+                        {{ form.branch }}
+                        {% if form.branch.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.branch.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text font-xs text-secondary">Wajib diisi untuk pengajar atau admin cabang.</div>
+                    </div>
+                </div>
+
+                
+                <div class="mb-3">
+                    <label for="id_warna_kalender" class="form-label font-xs fw-bold text-uppercase text-secondary">Warna Kalender</label>
+                    <div class="d-flex align-items-center gap-3">
+                        {{ form.warna_kalender }}
+                        <span class="font-xs text-secondary">Pilih warna penanda jadwal pengajar.</span>
+                    </div>
+                    {% if form.warna_kalender.errors %}
+                    <div class="text-danger font-xs mt-1">{{ form.warna_kalender.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <h6 class="fw-bold text-dark border-bottom pb-2 mt-4 mb-3">
+                    <i class="bi bi-key-fill text-secondary me-1"></i> Perbarui Password (Opsional)
+                </h6>
+
+                <div class="row">
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_password" class="form-label font-xs fw-bold text-uppercase text-secondary">Password Baru</label>
+                        <div class="input-group">
+                            {{ form.password }}
+                            <button class="btn btn-light border toggle-password-btn" type="button" data-target="id_password" aria-label="Lihat password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_password_confirm" class="form-label font-xs fw-bold text-uppercase text-secondary">Konfirmasi Password Baru</label>
+                        <div class="input-group">
+                            {{ form.password_confirm }}
+                            <button class="btn btn-light border toggle-password-btn" type="button" data-target="id_password_confirm" aria-label="Lihat password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password_confirm.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.password_confirm.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if form.non_field_errors %}
+                <div class="text-danger font-xs mb-3">{{ form.non_field_errors.0 }}</div>
+                {% endif %}
+
+                <hr class="my-4">
+
+                
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary rounded-pill px-4 py-2">Batal</a>
+                    <button type="submit" class="btn btn-teal rounded-pill px-4 py-2 fw-semibold">
+                        <i class="bi bi-check-circle-fill me-1"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

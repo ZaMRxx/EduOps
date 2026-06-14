@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - EduOps Educourse.id{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0" style="max-width: 600px; margin: 0 auto;">
+    
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2 border-bottom pb-3">
+        <div>
+            <h4 class="fw-bold m-0 text-teal">{{ title }}</h4>
+            <p class="text-secondary font-sm mb-0">Lengkapi formulir di bawah ini untuk menambahkan atau memperbarui data sekolah/mitra.</p>
+        </div>
+        <div>
+            <a href="{% url 'sekolah_list' %}" class="btn btn-light border btn-sm font-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Batal
+            </a>
+        </div>
+    </div>
+    
+    
+    <div class="card shadow-sm border border-light-subtle" style="border-radius: 12px;">
+        <div class="card-header bg-teal-light text-teal p-3" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+            <h5 class="fw-bold m-0 d-flex align-items-center">
+                <i class="bi bi-building me-2"></i> Formulir Sekolah / Mitra
+            </h5>
+        </div>
+        <div class="card-body p-4 p-md-5">
+            
+            {% if form.errors %}
+            <div class="alert alert-danger font-sm border-0 shadow-sm mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Mohon perbaiki beberapa kesalahan pengisian form di bawah ini.
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="">
+                {% csrf_token %}
+                
+                
+                <div class="mb-3">
+                    <label for="id_nama" class="form-label font-xs fw-bold text-uppercase text-secondary">Nama Sekolah / Mitra</label>
+                    {{ form.nama }}
+                    {% if form.nama.errors %}
+                    <div class="text-danger font-xs mt-1">{{ form.nama.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="row">
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_branch" class="form-label font-xs fw-bold text-uppercase text-secondary">Cabang / Branch</label>
+                        {{ form.branch }}
+                        {% if form.branch.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.branch.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_tipe" class="form-label font-xs fw-bold text-uppercase text-secondary">Tipe Sekolah</label>
+                        {{ form.tipe }}
+                        {% if form.tipe.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.tipe.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'sekolah_list' %}" class="btn btn-outline-secondary rounded-pill px-4 py-2">Batal</a>
+                    <button type="submit" class="btn btn-teal rounded-pill px-4 py-2 fw-semibold">
+                        <i class="bi bi-check-circle-fill me-1"></i> Simpan Sekolah
+                    </button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

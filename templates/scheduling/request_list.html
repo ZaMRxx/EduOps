@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pengajuan Jadwal - EduOps Educourse.id{% endblock %}
+
+{% block extra_css %}
+<style>
+    
+    .request-main-card {
+        background-color: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+    
+    .card-header-clean {
+        background-color: #ffffff;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 16px 20px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    
+    .req-list-group-item {
+        border-left: 5px solid transparent;
+        transition: all 0.2s ease;
+        padding: 20px;
+    }
+    
+    .req-list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .req-list-group-item.pending {
+        border-left-color: #ffc107; 
+    }
+    
+    .req-list-group-item.approved {
+        border-left-color: #198754; 
+    }
+    
+    .req-list-group-item.rejected {
+        border-left-color: #dc3545; 
+    }
+    
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-teal-light);
+        color: var(--primary-teal);
+        font-weight: 700;
+        font-size: 14px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .request-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .request-form-grid .span-2 {
+        grid-column: 1 / -1;
+    }
+
+    @media (max-width: 575.98px) {
+        .request-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .request-form-grid .span-2 {
+            grid-column: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold m-0 text-teal">Pengajuan Jadwal</h4>
+            <p class="text-secondary font-sm mb-0">
+                {% if role == 'teacher' %}
+                    Ajukan perubahan jadwal mengajar Anda dan pantau status persetujuan di sini.
+                {% elif role == 'admin_branch' %}
+                    Ajukan request operasional cabang atau kelola request dari guru sewilayah Anda.
+                {% else %}
+                    Kelola dan proses pengajuan request jadwal dari guru dan cabang.
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'dashboard' %}" class="btn btn-light border btn-sm font-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Kembali ke Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        
+        
+        {% if role == 'teacher' or role == 'admin_branch' %}
+        
+            
+            <div class="col-lg-8 mb-4">
+                <div class="card request-main-card">
+                    <div class="card-header-clean">
+                        <h5 class="fw-bold m-0 text-dark">
+                            <i class="bi bi-journal-text text-teal me-2"></i> Riwayat Pengajuan Jadwal
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for r in requests %}
+                            <div class="list-group-item req-list-group-item {{ r.status }}">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-circle">
+                                            {{ r.pengaju.username|slice:":2"|upper }}
+                                        </div>
+                                        <div>
+                                            <span class="fw-bold text-dark">{{ r.pengaju.nama_lengkap|default:r.pengaju.username }}</span>
+                                            <span class="badge bg-secondary-subtle text-secondary font-xs ms-1">{{ r.pengaju.get_role_display }}</span>
+                                            <div class="text-secondary font-xs" style="font-size: 11px;">
+                                                <i class="bi bi-clock me-1"></i> {{ r.dibuat_at|date:"d M Y, H:i" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {% if r.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark font-xs px-3 py-1.5 rounded-pill shadow-sm">Menunggu Persetujuan</span>
+                                        {% elif r.status == 'approved' %}
+                                        <span class="badge bg-success text-white font-xs px-3 py-1.5 rounded-pill shadow-sm">Disetujui</span>
+                                        {% else %}
+                                        <span class="badge bg-danger text-white font-xs px-3 py-1.5 rounded-pill shadow-sm">Ditolak</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-light p-3 rounded font-sm text-dark mb-3 border">
+                                    <div class="fw-bold mb-1">
+                                        {% if r.request_type == 'edit' %}Perubahan Jadwal{% else %}Jadwal Baru{% endif %}: {{ r.nama_kelas|default:"-" }}
+                                    </div>
+                                    <div class="font-xs text-secondary">
+                                        Guru: {{ r.guru.nama_lengkap|default:r.guru.username|default:"-" }} |
+                                        Sekolah: {{ r.sekolah.nama|default:"Tanpa Sekolah" }} |
+                                        {{ r.hari|default:"-" }} {{ r.jam_mulai|time:"H:i" }} - {{ r.jam_selesai|time:"H:i" }}
+                                    </div>
+                                    {% if r.detail %}
+                                    <div class="mt-2">{{ r.detail|linebreaksbr }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if r.status != 'pending' %}
+                                <div class="text-secondary font-xs border-top pt-2 d-flex justify-content-between flex-wrap gap-2" style="font-size: 11px;">
+                                    <span>
+                                        <i class="bi bi-person-check me-1"></i> Diproses oleh: <strong>{{ r.diproses_oleh.nama_lengkap|default:r.diproses_oleh.username }}</strong>
+                                    </span>
+                                    <span>
+                                        <i class="bi bi-calendar-check me-1"></i> Tanggal proses: <strong>{{ r.diproses_at|date:"d M Y, H:i" }}</strong>
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% empty %}
+                            <div class="p-5 text-center text-muted">
+                                <i class="bi bi-inbox opacity-50 mb-3" style="font-size: 3rem;"></i>
+                                <h6 class="fw-bold text-dark">Belum Ada Pengajuan</h6>
+                                <p class="font-xs text-secondary mb-0">Anda belum pernah mengirim pengajuan request jadwal apa pun.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% include 'pagination.html' %}
+                    </div>
+                </div>
+            </div>
+            
+            
+            <div class="col-lg-4">
+                <div class="card request-main-card sticky-top" style="top: 85px; z-index: 1;">
+                    <div class="card-header-clean bg-teal-light text-teal">
+                        <h5 class="fw-bold m-0 d-flex align-items-center">
+                            <i class="bi bi-pencil-square me-2"></i> Buat Pengajuan Baru
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="{% url 'request_list' %}">
+                            {% csrf_token %}
+                            {% if form.non_field_errors %}
+                            <div class="alert alert-danger font-xs border-0">{{ form.non_field_errors }}</div>
+                            {% endif %}
+
+                            <div class="request-form-grid">
+                                <div class="span-2">
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Jenis Pengajuan</label>
+                                    {{ form.request_type }}
+                                </div>
+                                <div class="span-2" id="requestTargetWrapper">
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Jadwal yang Diubah</label>
+                                    {{ form.target_jadwal }}
+                                    {% if form.target_jadwal.errors %}<div class="text-danger font-xs mt-1">{{ form.target_jadwal.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="span-2">
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Pengajar</label>
+                                    {{ form.guru }}
+                                    {% if form.guru.errors %}<div class="text-danger font-xs mt-1">{{ form.guru.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="span-2">
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Sekolah / Lokasi</label>
+                                    {{ form.sekolah }}
+                                </div>
+                                <div class="span-2">
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Nama Kelas</label>
+                                    {{ form.nama_kelas }}
+                                    {% if form.nama_kelas.errors %}<div class="text-danger font-xs mt-1">{{ form.nama_kelas.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Hari</label>
+                                    {{ form.hari }}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Mode</label>
+                                    {{ form.mode }}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Jam Mulai</label>
+                                    {{ form.jam_mulai }}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Jam Selesai</label>
+                                    {{ form.jam_selesai }}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Pertemuan/Minggu</label>
+                                    {{ form.pertemuan_per_minggu }}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Ke Sekolah/Minggu</label>
+                                    {{ form.kali_ke_sekolah_per_minggu }}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Jam Pulang-Pergi</label>
+                                    {{ form.jam_berangkat_pulang }}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Tipe</label>
+                                    {{ form.tipe }}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Kegiatan</label>
+                                    {{ form.kegiatan }}
+                                </div>
+                                <div>
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Perulangan</label>
+                                    {{ form.tipe_repeat }}
+                                </div>
+                                <div class="span-2" id="div_tanggal_spesifik">
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Tanggal Spesifik</label>
+                                    {{ form.tanggal_spesifik }}
+                                </div>
+                                <div id="div_tanggal_mulai_efektif">
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Mulai Efektif</label>
+                                    {{ form.tanggal_mulai_efektif }}
+                                </div>
+                                <div id="div_tanggal_selesai">
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Selesai Efektif</label>
+                                    {{ form.tanggal_selesai }}
+                                </div>
+                                <div class="span-2">
+                                    <label class="form-label font-xs fw-bold text-uppercase text-secondary">Alasan / Keterangan</label>
+                                    {{ form.detail }}
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-teal w-100 rounded-pill py-2 fw-semibold mt-3">
+                                <i class="bi bi-send me-1"></i> Kirim Pengajuan
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+        {% else %}
+        
+            
+            <div class="col-12">
+                <div class="card request-main-card">
+                    <div class="card-header-clean">
+                        <h5 class="fw-bold m-0 text-dark">
+                            <i class="bi bi-shield-lock text-teal me-2"></i> Daftar Pengajuan Jadwal Seluruh Cabang
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for r in requests %}
+                            <div class="list-group-item req-list-group-item {{ r.status }}">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-circle">
+                                            {{ r.pengaju.username|slice:":2"|upper }}
+                                        </div>
+                                        <div>
+                                            <span class="fw-bold text-dark">{{ r.pengaju.nama_lengkap|default:r.pengaju.username }}</span>
+                                            <span class="badge bg-teal-light text-teal font-xs ms-1">{{ r.pengaju.get_role_display }}</span>
+                                            {% if r.pengaju.branch %}
+                                            <span class="badge bg-secondary-subtle text-secondary font-xs">{{ r.pengaju.branch }}</span>
+                                            {% endif %}
+                                            <div class="text-secondary font-xs mt-0.5" style="font-size: 11px;">
+                                                <i class="bi bi-clock me-1"></i> {{ r.dibuat_at|date:"d M Y, H:i" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if r.status == 'pending' %}
+                                            <span class="badge bg-warning text-dark font-xs px-3 py-1.5 rounded-pill shadow-sm me-2">Menunggu Proses</span>
+                                            
+                                            
+                                            {% if role == 'admin_op' %}
+                                            <div class="d-flex gap-1">
+                                                <a href="{% url 'request_approve' r.id %}" class="btn btn-success btn-sm font-xs rounded-pill px-3" data-confirm-title="Setujui Pengajuan" data-confirm-message="Apakah Anda yakin menyetujui pengajuan jadwal #{{ r.id }}?" data-confirm-button="Ya, Setujui" data-confirm-class="btn-success">
+                                                    <i class="bi bi-check-circle me-1"></i> Setujui
+                                                </a>
+                                                <a href="{% url 'request_reject' r.id %}" class="btn btn-danger btn-sm font-xs rounded-pill px-3" data-confirm-title="Tolak Pengajuan" data-confirm-message="Apakah Anda yakin menolak pengajuan jadwal #{{ r.id }}?" data-confirm-button="Ya, Tolak" data-confirm-class="btn-danger">
+                                                    <i class="bi bi-x-circle me-1"></i> Tolak
+                                                </a>
+                                            </div>
+                                            {% endif %}
+                                            
+                                        {% elif r.status == 'approved' %}
+                                            <span class="badge bg-success text-white font-xs px-3 py-1.5 rounded-pill shadow-sm">Disetujui</span>
+                                        {% else %}
+                                            <span class="badge bg-danger text-white font-xs px-3 py-1.5 rounded-pill shadow-sm">Ditolak</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-light p-3 rounded font-sm text-dark mb-3 border">
+                                    <div class="fw-bold mb-1">
+                                        {% if r.request_type == 'edit' %}Perubahan Jadwal{% else %}Jadwal Baru{% endif %}: {{ r.nama_kelas|default:"-" }}
+                                    </div>
+                                    <div class="font-xs text-secondary">
+                                        Guru: {{ r.guru.nama_lengkap|default:r.guru.username|default:"-" }} |
+                                        Sekolah: {{ r.sekolah.nama|default:"Tanpa Sekolah" }} |
+                                        {{ r.hari|default:"-" }} {{ r.jam_mulai|time:"H:i" }} - {{ r.jam_selesai|time:"H:i" }}
+                                    </div>
+                                    {% if r.detail %}
+                                    <div class="mt-2">{{ r.detail|linebreaksbr }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if r.status != 'pending' %}
+                                <div class="text-secondary font-xs border-top pt-2 d-flex justify-content-between flex-wrap gap-2" style="font-size: 11px;">
+                                    <span>
+                                        <i class="bi bi-person-check me-1"></i> Diproses oleh: <strong>{{ r.diproses_oleh.nama_lengkap|default:r.diproses_oleh.username }}</strong>
+                                    </span>
+                                    <span>
+                                        <i class="bi bi-calendar-check me-1"></i> Tanggal proses: <strong>{{ r.diproses_at|date:"d M Y, H:i" }}</strong>
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% empty %}
+                            <div class="p-5 text-center text-muted">
+                                <i class="bi bi-inbox opacity-50 mb-3" style="font-size: 3rem;"></i>
+                                <h6 class="fw-bold text-dark">Tidak Ada Pengajuan</h6>
+                                <p class="font-xs text-secondary mb-0">Belum ada pengajuan request jadwal dari cabang maupun guru saat ini.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% include 'pagination.html' %}
+                    </div>
+                </div>
+            </div>
+            
+        {% endif %}
+        
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const requestType = document.getElementById('id_request_type');
+        const targetWrapper = document.getElementById('requestTargetWrapper');
+        const repeatType = document.getElementById('id_tipe_repeat');
+        const tanggalSpesifik = document.getElementById('div_tanggal_spesifik');
+        const mulaiEfektif = document.getElementById('div_tanggal_mulai_efektif');
+        const selesaiEfektif = document.getElementById('div_tanggal_selesai');
+
+        function toggleRequestTarget() {
+            if (!requestType || !targetWrapper) return;
+            targetWrapper.style.display = requestType.value === 'edit' ? 'block' : 'none';
+        }
+
+        function toggleRepeatFields() {
+            if (!repeatType || !tanggalSpesifik || !mulaiEfektif || !selesaiEfektif) return;
+            const oneTime = repeatType.value === 'one_time';
+            tanggalSpesifik.style.display = oneTime ? 'block' : 'none';
+            mulaiEfektif.style.display = oneTime ? 'none' : 'block';
+            selesaiEfektif.style.display = oneTime ? 'none' : 'block';
+        }
+
+        toggleRequestTarget();
+        toggleRepeatFields();
+        if (requestType) requestType.addEventListener('change', toggleRequestTarget);
+        if (repeatType) repeatType.addEventListener('change', toggleRepeatFields);
+    });
+</script>
+{% endblock %}

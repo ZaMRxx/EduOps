@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Isi Absensi Wajah - EduOps Educourse.id{% endblock %}
+
+{% block extra_css %}
+<style>
+    .webcam-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        border-radius: 16px;
+        overflow: hidden;
+        background-color: #1a1a1a;
+        aspect-ratio: 4 / 3;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border: 4px solid #fff;
+    }
+    
+    #webcam-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1); 
+    }
+    
+    #photo-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+        transform: scaleX(-1); 
+    }
+
+    
+    .face-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    .face-oval {
+        width: 60%;
+        height: 75%;
+        border: 3px dashed #1D9E75;
+        border-radius: 50% / 50%;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+        position: relative;
+        transition: border-color 0.3s ease;
+    }
+
+    .face-oval::before {
+        content: 'Posisikan Wajah di Sini';
+        position: absolute;
+        bottom: -35px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #ffffff;
+        background-color: #1D9E75;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card-absensi {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+    }
+
+    .btn-teal {
+        background-color: #1D9E75;
+        color: #ffffff;
+        border: none;
+    }
+    
+    .btn-teal:hover {
+        background-color: #17805e;
+        color: #ffffff;
+    }
+    
+    .btn-teal:disabled {
+        background-color: #a8d5c7;
+        color: #ffffff;
+    }
+
+    #webcam-fallback {
+        display: none;
+        padding: 40px 20px;
+        text-align: center;
+        color: #dc3545;
+        background-color: #fdf2f2;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    
+    <div class="mb-4">
+        <h4 class="fw-bold text-teal m-0">Absensi Wajah</h4>
+        <p class="text-secondary font-sm mb-0">Silakan lakukan absensi kelas Anda hari ini dengan melakukan scan wajah secara real-time.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card card-absensi p-4">
+                <div class="row g-4">
+                    
+                    
+                    <div class="col-md-6 d-flex flex-column align-items-center">
+                        <div class="webcam-wrapper mb-3">
+                            
+                            <video id="webcam-video" autoplay playsinline></video>
+                            
+                            
+                            <img id="photo-preview" alt="Preview Absensi" />
+                            
+                            
+                            <div class="face-overlay" id="face-overlay">
+                                <div class="face-oval"></div>
+                            </div>
+                            
+                            
+                            <div id="webcam-fallback" style="display: none;">
+                                <i class="bi bi-camera-video-off-fill text-danger fs-1 mb-2"></i>
+                                <h6 class="fw-bold">Kamera Tidak Diakses</h6>
+                                <p class="font-xs text-secondary mb-0">Sistem mendeteksi kamera tidak aktif atau akses izin ditolak browser. Mohon izinkan kamera untuk melanjutkan.</p>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="d-flex flex-column align-items-center gap-2 mt-2">
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button type="button" class="btn btn-teal rounded-pill px-4" id="btn-capture">
+                                    <i class="bi bi-camera-fill me-2"></i> Ambil Foto
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" id="btn-retry" style="display: none;">
+                                    <i class="bi bi-arrow-counterclockwise me-2"></i> Foto Ulang
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="col-md-6">
+                        <form method="POST" id="absensi-form" action="{% url 'absensi_form' %}">
+                            {% csrf_token %}
+                            
+                            
+                            <canvas id="webcam-canvas" style="display: none;"></canvas>
+                            
+                            
+                            <input type="hidden" name="image_data" id="image_data">
+                            
+                            <h5 class="fw-bold text-dark mb-3">Detail Kehadiran</h5>
+                            
+                            
+                            <div class="mb-3">
+                                <label class="form-label font-xs text-secondary text-uppercase fw-semibold">Tanggal Absen</label>
+                                <div class="form-control bg-light font-sm border-0 py-2">
+                                    <i class="bi bi-calendar-check text-teal me-2"></i>
+                                    <strong>{{ hari_ini_nama }}, {{ today_date|date:"d F Y" }}</strong>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="mb-4">
+                                <label for="jadwal_id" class="form-label font-xs text-secondary text-uppercase fw-semibold">Pilih Kelas / Jadwal Anda</label>
+                                <select class="form-select font-sm py-2" name="jadwal_id" id="jadwal_id" required>
+                                    <option value="" disabled {% if not selected_jadwal %}selected{% endif %}>-- Pilih Kelas --</option>
+                                    {% for s in schedules %}
+                                        <option value="{{ s.id }}" {% if selected_jadwal.id == s.id %}selected{% endif %}>
+                                            {{ s.nama_kelas }} ({{ s.jam_mulai|time:"H:i" }} - {{ s.jam_selesai|time:"H:i" }}) - {{ s.sekolah.nama|default:"Tanpa Sekolah" }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text font-xs text-secondary mt-1">
+                                    *Hanya menampilkan jadwal mengajar aktif Anda pada hari <strong>{{ hari_ini_nama }}</strong>.
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="alert alert-info border-0 shadow-sm font-xs p-3 mb-4 rounded-3">
+                                <h6 class="fw-bold mb-1"><i class="bi bi-info-circle-fill me-2"></i>Petunjuk Absensi:</h6>
+                                <ol class="ps-3 mb-0">
+                                    <li>Pilih jadwal kelas Anda terlebih dahulu.</li>
+                                    <li>Posisikan wajah Anda berada di dalam lingkaran pembantu.</li>
+                                    <li>Klik tombol <strong>Ambil Foto</strong>.</li>
+                                    <li>Pastikan foto Anda terlihat jelas, lalu klik <strong>Kirim Kehadiran</strong>.</li>
+                                </ol>
+                            </div>
+                            
+                            
+                            <button type="submit" class="btn btn-teal w-100 py-2.5 rounded-3 fw-bold" id="btn-submit" disabled>
+                                <i class="bi bi-shield-check me-2"></i> Kirim Kehadiran
+                            </button>
+                        </form>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const video = document.getElementById('webcam-video');
+        const preview = document.getElementById('photo-preview');
+        const canvas = document.getElementById('webcam-canvas');
+        const base64Input = document.getElementById('image_data');
+        const overlay = document.getElementById('face-overlay');
+        const fallback = document.getElementById('webcam-fallback');
+        
+        const btnCapture = document.getElementById('btn-capture');
+        const btnRetry = document.getElementById('btn-retry');
+        const btnSubmit = document.getElementById('btn-submit');
+        const form = document.getElementById('absensi-form');
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                width: { ideal: 640 },
+                height: { ideal: 480 },
+                facingMode: "user"
+            }
+        })
+        .then(function (stream) {
+            video.srcObject = stream;
+        })
+        .catch(function (err) {
+            console.error("Gagal memicu webcam:", err);
+            fallback.style.display = 'flex';
+            video.style.display = 'none';
+            overlay.style.display = 'none';
+            btnCapture.disabled = true;
+        });
+        btnCapture.addEventListener('click', function () {
+            if (!video.videoWidth) return;
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            base64Input.value = dataUrl;
+            preview.src = dataUrl;
+            preview.style.display = 'block';
+            video.style.display = 'none';
+            overlay.style.display = 'none';
+            btnCapture.style.display = 'none';
+            btnRetry.style.display = 'inline-block';
+            btnSubmit.disabled = false;
+        });
+        btnRetry.addEventListener('click', function () {
+            base64Input.value = '';
+            
+            preview.style.display = 'none';
+            video.style.display = 'block';
+            overlay.style.display = 'flex';
+            
+            btnCapture.style.display = 'inline-block';
+            btnRetry.style.display = 'none';
+            btnSubmit.disabled = true;
+        });
+        form.addEventListener('submit', function () {
+            const stream = video.srcObject;
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+        });
+    });
+</script>
+{% endblock %}

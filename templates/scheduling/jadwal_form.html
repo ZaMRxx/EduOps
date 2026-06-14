@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - EduOps Educourse.id{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3">
+    
+    
+    <div class="card shadow-sm border-0 rounded-4 bg-white mx-auto" style="max-width: 900px;">
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <h4 class="fw-bold m-0 text-teal">
+                <i class="bi bi-calendar-plus me-2"></i> {{ title }}
+            </h4>
+            <p class="text-secondary font-sm m-0">Lengkapi detail jadwal operasional di bawah ini.</p>
+        </div>
+        
+        <div class="card-body p-4">
+            
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger border-0 font-sm mb-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row g-4">
+                    
+                    
+                    <div class="col-md-6 border-end-md">
+                        
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.nama_kelas.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Nama Kelas <span class="text-danger">*</span>
+                            </label>
+                            {{ form.nama_kelas }}
+                            {% if form.nama_kelas.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.nama_kelas.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.sekolah.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Sekolah / Lokasi
+                            </label>
+                            {{ form.sekolah }}
+                            {% if form.sekolah.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.sekolah.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.guru.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Pengajar <span class="text-danger">*</span>
+                            </label>
+                            {{ form.guru }}
+                            {% if form.guru.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.guru.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.hari.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Hari Kelas <span class="text-danger">*</span>
+                            </label>
+                            {{ form.hari }}
+                            {% if form.hari.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.hari.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.tipe_repeat.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Tipe Perulangan <span class="text-danger">*</span>
+                            </label>
+                            {{ form.tipe_repeat }}
+                            {% if form.tipe_repeat.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.tipe_repeat.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        
+                        <div class="mb-3" id="div_tanggal_spesifik">
+                            <label for="{{ form.tanggal_spesifik.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Tanggal Spesifik Kelas <span class="text-danger">*</span>
+                            </label>
+                            {{ form.tanggal_spesifik }}
+                            {% if form.tanggal_spesifik.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.tanggal_spesifik.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                    </div>
+                    
+                    
+                    <div class="col-md-6">
+                        
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.jam_mulai.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Jam Mulai <span class="text-danger">*</span>
+                            </label>
+                            {{ form.jam_mulai }}
+                            {% if form.jam_mulai.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.jam_mulai.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.jam_selesai.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Jam Selesai <span class="text-danger">*</span>
+                            </label>
+                            {{ form.jam_selesai }}
+                            {% if form.jam_selesai.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.jam_selesai.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        
+                        <div class="border rounded-3 p-3 mb-3 bg-light">
+                            <div class="font-xs text-secondary text-uppercase fw-bold mb-2">
+                                Perhitungan Load
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.pertemuan_per_minggu.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                    Seminggu Berapa Kali Pertemuan <span class="text-danger">*</span>
+                                </label>
+                                {{ form.pertemuan_per_minggu }}
+                                {% if form.pertemuan_per_minggu.errors %}
+                                    <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.pertemuan_per_minggu.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.jam_berangkat_pulang.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                    Total Jam Berangkat dan Pulang
+                                </label>
+                                {{ form.jam_berangkat_pulang }}
+                                {% if form.jam_berangkat_pulang.errors %}
+                                    <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.jam_berangkat_pulang.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.kali_ke_sekolah_per_minggu.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                    Berapa Kali per Minggu ke Sekolah
+                                </label>
+                                {{ form.kali_ke_sekolah_per_minggu }}
+                                {% if form.kali_ke_sekolah_per_minggu.errors %}
+                                    <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.kali_ke_sekolah_per_minggu.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="font-xs text-secondary mt-2">
+                                Rumus: (jam mengajar x pertemuan) + (jam berangkat/pulang x kali ke sekolah).
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.mode.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Mode Belajar <span class="text-danger">*</span>
+                            </label>
+                            {{ form.mode }}
+                            {% if form.mode.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.mode.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.tipe.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Tipe Jadwal <span class="text-danger">*</span>
+                            </label>
+                            {{ form.tipe }}
+                            <datalist id="tipe-choices">
+                                <option value="Regular">
+                                <option value="Event">
+                                <option value="Trial">
+                                <option value="Workshop">
+                                <option value="Private">
+                                <option value="Bootcamp">
+                            </datalist>
+                            {% if form.tipe.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.tipe.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.kegiatan.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                Jenis Kegiatan <span class="text-danger">*</span>
+                            </label>
+                            {{ form.kegiatan }}
+                            {% if form.kegiatan.errors %}
+                                <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.kegiatan.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        
+                        <div class="row" id="div_tanggal_efektif">
+                            <div class="col-6 mb-3">
+                                <label for="{{ form.tanggal_mulai_efektif.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                    Mulai Efektif
+                                </label>
+                                {{ form.tanggal_mulai_efektif }}
+                                {% if form.tanggal_mulai_efektif.errors %}
+                                    <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.tanggal_mulai_efektif.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label for="{{ form.tanggal_selesai.id_for_label }}" class="form-label font-sm fw-semibold text-secondary">
+                                    Selesai Efektif
+                                </label>
+                                {{ form.tanggal_selesai }}
+                                {% if form.tanggal_selesai.errors %}
+                                    <div class="text-danger font-xs mt-1"><i class="bi bi-x-circle me-1"></i> {{ form.tanggal_selesai.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        
+                        <div class="form-check form-switch mt-4">
+                            {{ form.aktif }}
+                            <label class="form-check-label font-sm fw-semibold text-secondary" for="{{ form.aktif.id_for_label }}">
+                                Jadwal Aktif
+                            </label>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="d-flex justify-content-end gap-2 border-top pt-4 mt-4">
+                    <a href="{% url 'jadwal_list' %}" class="btn btn-light rounded-pill px-4 font-sm fw-medium">
+                        Batal
+                    </a>
+                    <button type="submit" class="btn btn-teal rounded-pill px-5 font-sm fw-semibold">
+                        <i class="bi bi-check-circle me-1"></i> Simpan
+                    </button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tipeRepeatSelect = document.getElementById('id_tipe_repeat');
+        const divTanggalSpesifik = document.getElementById('div_tanggal_spesifik');
+        const divTanggalEfektif = document.getElementById('div_tanggal_efektif');
+        
+        function toggleRepeatFields() {
+            if (tipeRepeatSelect.value === 'one_time') {
+                divTanggalSpesifik.style.display = 'block';
+                divTanggalEfektif.style.display = 'none';
+                document.getElementById('id_tanggal_mulai_efektif').value = '';
+                document.getElementById('id_tanggal_selesai').value = '';
+            } else {
+                divTanggalSpesifik.style.display = 'none';
+                divTanggalEfektif.style.display = 'flex';
+                document.getElementById('id_tanggal_spesifik').value = '';
+            }
+        }
+        toggleRepeatFields();
+        tipeRepeatSelect.addEventListener('change', toggleRepeatFields);
+    });
+</script>
+{% endblock %}

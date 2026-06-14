@@ -1,0 +1,349 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EduOps - Educourse.id{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'img/educourse-logo.png' %}">
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}?v={% now 'U' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="eduops-body text-dark {% if not hide_sidebar %}has-sidebar{% endif %}">
+
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-white py-2 sticky-top eduops-topbar">
+        <div class="container-fluid px-4">
+            {% if user.is_authenticated and not hide_sidebar %}
+            <button class="btn btn-light border rounded-3 d-xl-none me-2" type="button" id="sidebarToggle" aria-label="Buka menu">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            {% endif %}
+
+            
+            <a class="navbar-brand d-flex align-items-center gap-3" href="{% url 'dashboard' %}">
+                <span class="eduops-mobile-logo">
+                    <img src="{% static 'img/educourse-logo.png' %}" alt="Educourse.id">
+                </span>
+                <span class="d-none d-lg-inline-flex flex-column lh-sm">
+                    <span class="fw-bold tracking-tight text-dark">EduOps</span>
+                    <span class="font-xs text-secondary">Operasional Educourse.id</span>
+                </span>
+            </a>
+            
+            
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            
+            <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
+                {% if user.is_authenticated %}
+                <div class="d-flex align-items-center gap-2">
+                    <span class="me-3 text-end d-none d-md-inline-block">
+                        <a href="{% url 'profile_edit' %}" class="d-block fw-bold text-dark font-sm text-decoration-none">{{ user.nama_lengkap|default:user.username }}</a>
+                        <span class="badge bg-teal-light text-teal font-xs rounded-pill">{{ user.get_role_display }}</span>
+                    </span>
+                    <a href="{% url 'profile_edit' %}" class="topbar-avatar" title="Profil Saya">
+                        {% if user.foto_profile %}
+                        <img src="{{ user.foto_profile.url }}" alt="Foto {{ user.nama_lengkap|default:user.username }}">
+                        {% else %}
+                        <span>{{ user.nama_lengkap|default:user.username|slice:":1"|upper }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-teal btn-sm rounded-pill px-4">Masuk</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    
+    <div class="main-container">
+        
+        {% if not hide_sidebar %}
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+        <aside class="sidebar eduops-sidebar">
+            <div class="sidebar-brand">
+                <span>EduOps</span>
+            </div>
+            <div class="sidebar-menu-scroll p-3">
+                <ul class="nav flex-column gap-1">
+                    
+                    
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard' %}" class="nav-link rounded {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                            <i class="bi bi-house-door me-2"></i> Beranda
+                        </a>
+                    </li>
+                    
+                    
+                    {% if user.role != 'teacher' %}
+                    <li class="nav-item">
+                        <a href="{% url 'jadwal_list' %}" class="nav-link rounded {% if request.resolver_match.url_name == 'jadwal_list' or request.resolver_match.url_name == 'jadwal_add' or request.resolver_match.url_name == 'jadwal_edit' %}active{% endif %}">
+                            <i class="bi bi-calendar-event me-2"></i> Jadwal Kelas
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    
+                    <li class="nav-item">
+                        <a href="{% url 'schedule_view' %}" class="nav-link rounded {% if request.resolver_match.url_name == 'schedule_view' %}active{% endif %}">
+                            <i class="bi bi-calendar3 me-2"></i> Jadwal Kalender
+                        </a>
+                    </li>
+                    
+                    
+                    {% if user.role == 'teacher' %}
+                    <li class="nav-item">
+                        <a href="{% url 'absensi_form' %}" class="nav-link rounded {% if '/attendance/absen/' in request.path %}active{% endif %}">
+                            <i class="bi bi-camera me-2"></i> Absensi Wajah
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    
+                    <li class="nav-item">
+                        <a href="{% url 'riwayat_absensi' %}" class="nav-link rounded {% if '/attendance/riwayat/' in request.path %}active{% endif %}">
+                            <i class="bi bi-clock-history me-2"></i> Riwayat Absen
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="nav-item">
+                        <a href="{% url 'request_list' %}" class="nav-link rounded {% if '/scheduling/requests/' in request.path %}active{% endif %}">
+                            <i class="bi bi-envelope-paper me-2"></i> Pengajuan Jadwal
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'profile_edit' %}" class="nav-link rounded {% if request.resolver_match.url_name == 'profile_edit' %}active{% endif %}">
+                            <i class="bi bi-person-circle me-2"></i> Profil Saya
+                        </a>
+                    </li>
+                    
+                    
+                    {% if user.is_superuser or user.role == 'admin_op' or user.role == 'admin_hr' %}
+                    <li class="nav-item">
+                        <a href="{% url 'user_list' %}" class="nav-link rounded {% if '/accounts/users/' in request.path and 'create' not in request.path %}active{% endif %}">
+                            <i class="bi bi-people me-2"></i> Pengguna
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if user.is_superuser or user.role == 'admin_op' %}
+                    <li class="nav-item">
+                        <a href="{% url 'admin_create_user' %}" class="nav-link rounded {% if 'users/create/' in request.path %}active{% endif %}">
+                            <i class="bi bi-person-plus me-2"></i> Akun Baru
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if user.is_superuser or user.role == 'admin_op' or user.role == 'admin_hr' %}
+                    <li class="nav-item">
+                        <a href="{% url 'aktivitas_logs' %}" class="nav-link rounded {% if '/attendance/logs/' in request.path %}active{% endif %}">
+                            <i class="bi bi-journal-text me-2"></i> Log Aktivitas
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                </ul>
+            </div>
+            {% if user.is_authenticated %}
+            <div class="sidebar-footer">
+                <a href="{% url 'logout' %}" class="sidebar-logout">
+                    <i class="bi bi-box-arrow-right me-2"></i>
+                    <span>Keluar</span>
+                </a>
+            </div>
+            {% endif %}
+        </aside>
+        {% endif %}
+        
+        
+        <main class="content {% if hide_sidebar %}w-100 px-4 py-3 m-0{% else %}px-4 py-4{% endif %}">
+            
+            
+            {% if messages %}
+            <div class="row">
+                <div class="col-12">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm border-0" role="alert">
+                        {% if message.tags == 'success' %}
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        {% elif message.tags == 'error' %}
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% else %}
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            
+            {% block content %}
+            {% endblock %}
+            
+        </main>
+        
+    </div>
+
+    
+    <div class="modal fade" id="eduopsConfirmModal" tabindex="-1" aria-labelledby="eduopsConfirmTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content eduops-confirm-modal border-0">
+                <div class="modal-body p-4 p-md-5">
+                    <div class="d-flex gap-3 align-items-start">
+                        <div class="eduops-confirm-icon">
+                            <i class="bi bi-question-lg"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold text-dark mb-2" id="eduopsConfirmTitle">Konfirmasi Aksi</h5>
+                            <p class="text-secondary mb-0" id="eduopsConfirmMessage">Apakah Anda yakin ingin melanjutkan?</p>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4 flex-wrap">
+                        <button type="button" class="btn btn-light border rounded-pill px-4" data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button type="button" class="btn btn-danger rounded-pill px-4" id="eduopsConfirmButton">
+                            Ya, Lanjutkan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    document.body.classList.toggle('sidebar-open');
+                });
+            }
+            if (sidebarBackdrop) {
+                sidebarBackdrop.addEventListener('click', function() {
+                    document.body.classList.remove('sidebar-open');
+                });
+            }
+
+            const confirmModalElement = document.getElementById('eduopsConfirmModal');
+            const confirmMessage = document.getElementById('eduopsConfirmMessage');
+            const confirmTitle = document.getElementById('eduopsConfirmTitle');
+            const confirmButton = document.getElementById('eduopsConfirmButton');
+            let pendingConfirmAction = null;
+
+            function showEduOpsConfirm(options) {
+                if (!confirmModalElement || !window.bootstrap) return false;
+                confirmTitle.textContent = options.title || 'Konfirmasi Aksi';
+                confirmMessage.textContent = options.message || 'Apakah Anda yakin ingin melanjutkan?';
+                confirmButton.textContent = options.buttonText || 'Ya, Lanjutkan';
+                confirmButton.className = `btn ${options.buttonClass || 'btn-danger'} rounded-pill px-4`;
+                pendingConfirmAction = options.onConfirm;
+                bootstrap.Modal.getOrCreateInstance(confirmModalElement).show();
+                return true;
+            }
+
+            document.querySelectorAll('form[data-confirm-message]').forEach(function(form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    showEduOpsConfirm({
+                        title: form.dataset.confirmTitle,
+                        message: form.dataset.confirmMessage,
+                        buttonText: form.dataset.confirmButton || 'Ya, Hapus',
+                        buttonClass: form.dataset.confirmClass || 'btn-danger',
+                        onConfirm: function() {
+                            HTMLFormElement.prototype.submit.call(form);
+                        }
+                    });
+                });
+            });
+
+            document.querySelectorAll('a[data-confirm-message]').forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    showEduOpsConfirm({
+                        title: link.dataset.confirmTitle,
+                        message: link.dataset.confirmMessage,
+                        buttonText: link.dataset.confirmButton || 'Ya, Lanjutkan',
+                        buttonClass: link.dataset.confirmClass || 'btn-teal',
+                        onConfirm: function() {
+                            window.location.href = link.href;
+                        }
+                    });
+                });
+            });
+
+            if (confirmButton) {
+                confirmButton.addEventListener('click', function() {
+                    const action = pendingConfirmAction;
+                    pendingConfirmAction = null;
+                    bootstrap.Modal.getOrCreateInstance(confirmModalElement).hide();
+                    if (typeof action === 'function') action();
+                });
+            }
+
+            const searchInputs = document.querySelectorAll('input[name="q"], input[name="search"], input[name="search_teacher"], input[data-debounce-search]');
+            searchInputs.forEach(function(searchInput) {
+                const searchForm = searchInput.closest('form');
+                if (!searchForm) return;
+                let timeout = null;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(function() {
+                        searchForm.querySelector('input[name="page"]')?.remove();
+                        searchForm.submit();
+                    }, 500);
+                });
+                if (searchInput.value) {
+                    searchInput.focus();
+                    const val = searchInput.value;
+                    searchInput.value = '';
+                    searchInput.value = val;
+                }
+            });
+
+            document.querySelectorAll('.toggle-password-btn').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const input = document.getElementById(button.dataset.target);
+                    if (!input) return;
+                    const icon = button.querySelector('i');
+                    const visible = input.type === 'text';
+                    input.type = visible ? 'password' : 'text';
+                    if (icon) {
+                        icon.classList.toggle('bi-eye', visible);
+                        icon.classList.toggle('bi-eye-slash', !visible);
+                    }
+                });
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

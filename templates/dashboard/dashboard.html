@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - EduOps Educourse.id{% endblock %}
+
+{% block extra_css %}
+<style>
+    
+    .dashboard-stat-card {
+        border: none;
+        border-radius: 22px;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        box-shadow: 0 18px 44px rgba(7, 21, 47, 0.08);
+    }
+    
+    .dashboard-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 22px 48px rgba(7, 21, 47, 0.12);
+    }
+    
+    .stat-icon-wrapper {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        font-size: 1.45rem;
+    }
+    
+    
+    .dashboard-content-card {
+        background-color: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 22px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        margin-bottom: 24px;
+    }
+    
+    .card-header-clean {
+        background-color: #ffffff;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 16px 20px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    
+    .table-modern th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-top: none;
+    }
+    
+    .table-modern td {
+        font-size: 13px;
+        vertical-align: middle;
+    }
+    
+    .table-modern tr:last-child td {
+        border-bottom: none;
+    }
+    
+    
+    .request-item {
+        border-left: 4px solid transparent;
+        transition: background-color 0.2s ease;
+    }
+    
+    .request-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .request-item.pending {
+        border-left-color: #ffc107;
+    }
+    
+    .request-item.approved {
+        border-left-color: #198754;
+    }
+    
+    .request-item.rejected {
+        border-left-color: #dc3545;
+    }
+
+    .dashboard-hero-copy {
+        min-width: 0;
+        max-width: 820px;
+    }
+
+    .dashboard-hero-title {
+        font-size: clamp(2rem, 4.5vw, 3rem);
+        line-height: 1.08;
+        overflow-wrap: anywhere;
+    }
+
+    .dashboard-hero-subtitle {
+        font-size: clamp(1rem, 2.1vw, 1.35rem);
+        overflow-wrap: anywhere;
+    }
+
+    .dashboard-todo-card .card-body {
+        display: flex;
+        flex-direction: column;
+        max-height: min(760px, calc(100vh - 180px));
+        min-height: 0;
+    }
+
+    .dashboard-todo-card .table-responsive {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+    }
+
+    .dashboard-todo-card .card-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 3;
+        border-bottom-left-radius: 22px;
+        border-bottom-right-radius: 22px;
+        box-shadow: 0 -10px 24px rgba(7, 21, 47, 0.06);
+    }
+
+    @media (max-width: 991.98px) {
+        .dashboard-todo-card .card-body {
+            max-height: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div class="dashboard-hero-copy">
+            <div class="font-sm text-secondary mb-3">Halaman Utama <span class="mx-2">/</span> <strong class="text-dark">Beranda EduOps</strong></div>
+            <h1 class="dashboard-hero-title fw-bold m-0 text-dark">Halo, {{ user.nama_lengkap|default:user.username }}!</h1>
+            <p class="dashboard-hero-subtitle text-secondary mb-0">Kelola operasional Educourse.id dan pantau aktivitas hari ini.</p>
+        </div>
+        <div class="bg-white px-4 py-3 rounded-pill shadow-sm border font-sm text-secondary d-flex align-items-center gap-2">
+            <i class="bi bi-calendar-event text-teal"></i>
+            <span class="fw-semibold">{{ hari_ini_nama }}, {{ today_date|date:"d F Y" }}</span>
+        </div>
+    </div>
+    
+    
+    <div class="row mb-2">
+        {% for s in stats %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="{% if s.url_name %}{% url s.url_name %}{% else %}#{% endif %}" class="text-decoration-none">
+                <div class="card dashboard-stat-card h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between p-4">
+                        <div>
+                            <p class="text-secondary font-sm fw-semibold mb-2">{{ s.title }}</p>
+                            <h2 class="fw-bold m-0 text-dark" style="font-size: 2.4rem;">{{ s.value }}</h2>
+                        </div>
+                        <div class="stat-icon-wrapper {{ s.bg_class }}">
+                            <i class="bi {{ s.icon }}"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    
+    <div class="row">
+        
+        
+        <div class="col-lg-8">
+            <div class="card dashboard-content-card dashboard-todo-card">
+                <div class="card-header-clean d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h5 class="fw-bold m-0 text-dark d-flex align-items-center">
+                            <i class="bi bi-list-task text-teal me-2"></i> Jadwal Kelas & To-Do Hari Ini
+                        </h5>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <form method="GET" action="{% url 'dashboard' %}" class="d-flex" style="max-width: 280px; width: 100%;">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light text-secondary"><i class="bi bi-search"></i></span>
+                                <input type="text" name="q" class="form-control" placeholder="Cari jadwal, guru, sekolah..." value="{{ search_query }}">
+                                {% if search_query %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Reset</a>
+                                {% endif %}
+                            </div>
+                        </form>
+                        <a href="{% url 'schedule_view' %}" class="btn btn-outline-teal btn-sm font-xs rounded-pill">
+                            <i class="bi bi-calendar3 me-1"></i> Lihat Grid Kalender
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-modern align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Jam</th>
+                                    <th>Kelas / Mode</th>
+                                    <th>Sekolah / Lokasi</th>
+                                    {% if role != 'teacher' %}
+                                    <th>Guru / Pengajar</th>
+                                    {% endif %}
+                                    <th class="text-center pe-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in todo_list %}
+                                <tr>
+                                    
+                                    <td class="ps-4 fw-semibold text-dark">
+                                        <i class="bi bi-clock-history text-secondary me-1 font-xs"></i> 
+                                        {{ item.jam_mulai|time:"H:i" }} - {{ item.jam_selesai|time:"H:i" }}
+                                    </td>
+                                    
+                                    
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ item.nama_kelas }}</div>
+                                        <div class="mt-1 d-flex gap-1 flex-wrap">
+                                            {% if item.mode == 'online' %}
+                                            <span class="badge bg-primary text-white font-xs px-2 py-0.5 rounded-pill">Online</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary text-white font-xs px-2 py-0.5 rounded-pill">Offline</span>
+                                            {% endif %}
+                                            
+                                            {% if item.kegiatan == 'mengajar' %}
+                                            <span class="badge bg-success-subtle text-success font-xs px-2 py-0.5 rounded-pill">Utama</span>
+                                            {% elif item.kegiatan == 'asistensi' %}
+                                            <span class="badge bg-warning-subtle text-warning font-xs px-2 py-0.5 rounded-pill">Asisten</span>
+                                            {% else %}
+                                            <span class="badge bg-light text-secondary border font-xs px-2 py-0.5 rounded-pill">Lainnya</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    
+                                    
+                                    <td>
+                                        <div class="text-dark">{{ item.sekolah.nama|default:"Tanpa Sekolah" }}</div>
+                                        <div class="font-xs text-secondary mt-1">
+                                            <i class="bi bi-geo-alt-fill font-xs text-danger me-1"></i>
+                                            Branch: {{ item.sekolah.branch|default:item.guru.branch|default:"BSD" }}
+                                        </div>
+                                    </td>
+                                    
+                                    
+                                    {% if role != 'teacher' %}
+                                    <td class="text-secondary">
+                                        <div class="d-flex align-items-center">
+                                            <div class="stat-icon-wrapper bg-light text-secondary font-xs me-2 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                                                <i class="bi bi-person"></i>
+                                            </div>
+                                            <div>
+                                                <span class="fw-semibold text-dark">{{ item.guru.nama_lengkap|default:item.guru.username }}</span>
+                                                <div class="font-xs text-secondary">{{ item.guru.get_role_display }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    {% endif %}
+                                    
+                                    
+                                    <td class="text-center pe-4">
+                                        {% if role == 'teacher' %}
+                                            
+                                            <a href="{% url 'absensi_form' %}?jadwal_id={{ item.id }}" class="btn btn-teal btn-sm font-xs rounded-pill px-3">
+                                                <i class="bi bi-camera me-1"></i> Isi Absen
+                                            </a>
+                                        {% else %}
+                                            
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <a href="{% url 'jadwal_edit' item.id %}" class="btn btn-light btn-sm font-xs rounded border" title="Edit Jadwal">
+                                                    <i class="bi bi-pencil-square text-teal"></i>
+                                                </a>
+                                                <a href="{% url 'schedule_view' %}?hari={{ item.hari }}" class="btn btn-light btn-sm font-xs rounded border" title="Lihat di Grid">
+                                                    <i class="bi bi-eye text-primary"></i>
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="{% if role != 'teacher' %}5{% else %}4{% endif %}" class="py-5 text-center text-muted">
+                                        <div class="mb-2">
+                                            <i class="bi bi-calendar-check text-secondary opacity-50" style="font-size: 3rem;"></i>
+                                        </div>
+                                        {% if search_query %}
+                                            <h6 class="fw-bold text-dark">Jadwal Tidak Ditemukan</h6>
+                                            <p class="font-xs text-secondary mb-0">Tidak ada jadwal hari ini yang cocok dengan pencarian "{{ search_query }}".</p>
+                                        {% else %}
+                                            <h6 class="fw-bold text-dark">Tidak Ada Jadwal Hari Ini</h6>
+                                            <p class="font-xs text-secondary mb-0">Hari ini bersih dari jadwal mengajar. Waktunya istirahat atau menyusun modul pembelajaran!</p>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% include 'pagination.html' %}
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="col-lg-4">
+            <div class="card dashboard-content-card">
+                <div class="card-header-clean d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold m-0 text-dark d-flex align-items-center">
+                        <i class="bi bi-envelope-paper text-teal me-2"></i>
+                        {% if role == 'teacher' %} Pengajuan Saya {% else %} Pengajuan Pending {% endif %}
+                    </h5>
+                    <a href="{% url 'request_list' %}" class="btn btn-light border btn-sm font-xs rounded-pill">
+                        Lihat Semua
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for r in pending_requests %}
+                        <div class="list-group-item p-3 request-item {{ r.status }}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="font-xs fw-bold text-secondary">Pengajuan #{{ r.id }}</span>
+                                {% if r.status == 'pending' %}
+                                <span class="badge bg-warning-subtle text-warning font-xs rounded-pill">Pending</span>
+                                {% elif r.status == 'approved' %}
+                                <span class="badge bg-success-subtle text-success font-xs rounded-pill">Approved</span>
+                                {% else %}
+                                <span class="badge bg-danger-subtle text-danger font-xs rounded-pill">Rejected</span>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="font-xs text-dark mb-2 text-truncate-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                {{ r.detail }}
+                            </p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap">
+                                <span class="font-xs text-secondary">
+                                    <i class="bi bi-person-circle me-1"></i> {{ r.pengaju.nama_lengkap|default:r.pengaju.username }}
+                                </span>
+                                <span class="font-xs text-secondary" style="font-size: 10px;">
+                                    {{ r.dibuat_at|date:"d/m H:i" }}
+                                </span>
+                            </div>
+                            
+                            {% if role == 'admin_op' and r.status == 'pending' %}
+                            <div class="mt-3 d-flex gap-2">
+                                <a href="{% url 'request_list' %}" class="btn btn-teal btn-sm py-0.5 px-3 font-xs w-100 text-center rounded-pill">
+                                    <i class="bi bi-check-circle me-1"></i> Proses Pengajuan
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-envelope-open opacity-50 mb-2" style="font-size: 2rem;"></i>
+                            <p class="font-xs text-secondary mb-0">Tidak ada pengajuan request jadwal baru saat ini.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+</div>
+{% endblock %}

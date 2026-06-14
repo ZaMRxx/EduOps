@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Riwayat Absensi - EduOps Educourse.id{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card-riwayat {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+    }
+    
+    .table-modern th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-top: none;
+    }
+    
+    .table-modern td {
+        font-size: 13.5px;
+        vertical-align: middle;
+    }
+    
+    .absen-thumbnail {
+        width: 60px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .absen-thumbnail:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .badge-hadir {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .badge-terlambat {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    
+    .badge-teal-light {
+        background-color: #e3f2fd;
+        color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold text-teal m-0">Riwayat Absensi Guru</h4>
+            <p class="text-secondary font-sm mb-0">
+                {% if role == 'teacher' %}
+                    Lihat dan pantau riwayat kehadiran Anda pada jadwal kelas yang diajarkan.
+                {% elif role == 'admin_branch' %}
+                    Daftar kehadiran seluruh guru untuk Cabang **{{ user.branch }}**.
+                {% else %}
+                    Audit log riwayat absensi guru Educourse secara global.
+                {% endif %}
+            </p>
+        </div>
+        {% if role == 'teacher' %}
+        <a href="{% url 'absensi_form' %}" class="btn btn-teal rounded-pill px-4 font-sm shadow-sm">
+            <i class="bi bi-camera me-1"></i> Isi Absen Sekarang
+        </a>
+        {% endif %}
+    </div>
+
+    
+    <div class="card card-riwayat p-3 mb-4">
+        <form method="GET" action="{% url 'riwayat_absensi' %}" class="row g-2 align-items-end">
+            
+            
+            <div class="col-md-3">
+                <label for="search" class="form-label font-xs text-secondary fw-semibold text-uppercase">Cari</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search font-xs"></i></span>
+                    <input type="text" class="form-control bg-light border-start-0" id="search" name="search" value="{{ search }}" placeholder="Nama guru, kelas...">
+                </div>
+            </div>
+            
+            
+            <div class="col-md-2">
+                <label for="status" class="form-label font-xs text-secondary fw-semibold text-uppercase">Status</label>
+                <select class="form-select form-select-sm bg-light" id="status" name="status">
+                    <option value="">Semua Status</option>
+                    <option value="Hadir" {% if status_filter == 'Hadir' %}selected{% endif %}>Hadir</option>
+                    <option value="Terlambat" {% if status_filter == 'Terlambat' %}selected{% endif %}>Terlambat</option>
+                </select>
+            </div>
+            
+            
+            <div class="col-md-2">
+                <label for="tanggal_mulai" class="form-label font-xs text-secondary fw-semibold text-uppercase">Mulai Tanggal</label>
+                <input type="date" class="form-control form-control-sm bg-light" id="tanggal_mulai" name="tanggal_mulai" value="{{ tanggal_mulai }}">
+            </div>
+            
+            
+            <div class="col-md-2">
+                <label for="tanggal_selesai" class="form-label font-xs text-secondary fw-semibold text-uppercase">Sampai Tanggal</label>
+                <input type="date" class="form-control form-control-sm bg-light" id="tanggal_selesai" name="tanggal_selesai" value="{{ tanggal_selesai }}">
+            </div>
+            
+            
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-teal btn-sm px-3 w-100 rounded-2 fw-semibold">
+                    <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+                <a href="{% url 'riwayat_absensi' %}" class="btn btn-outline-secondary btn-sm px-3 w-100 rounded-2 fw-semibold">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                </a>
+            </div>
+            
+        </form>
+    </div>
+
+    
+    <div class="card card-riwayat p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 80px;">Foto</th>
+                        <th style="width: 140px;">Tanggal & Waktu</th>
+                        {% if role != 'teacher' %}
+                        <th>Nama Guru</th>
+                        <th style="width: 100px;">Cabang</th>
+                        {% endif %}
+                        <th>Kelas / Jadwal</th>
+                        <th style="width: 130px;">Jam Kelas</th>
+                        <th style="width: 120px;" class="text-center">Status</th>
+                        <th style="width: 150px;" class="text-center {% if role == 'teacher' %}pe-4{% endif %}">Wajah Verified</th>
+                        {% if role != 'teacher' %}
+                        <th style="width: 80px;" class="text-center pe-4">Aksi</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in riwayat_list %}
+                    <tr>
+                        
+                        <td class="ps-4">
+                            {% if item.foto %}
+                                <img src="{{ item.foto.url }}" class="absen-thumbnail" alt="Foto Absen" data-bs-toggle="modal" data-bs-target="#photoModal" data-img-url="{{ item.foto.url }}" data-teacher-name="{{ item.guru.nama_lengkap|default:item.guru.username }}" data-class-name="{{ item.jadwal.nama_kelas }}">
+                            {% else %}
+                                <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded" style="width: 60px; height: 45px; font-size: 10px;">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        
+                        
+                        <td>
+                            <div class="fw-semibold text-dark">{{ item.tanggal|date:"d M Y" }}</div>
+                            <div class="font-xs text-secondary"><i class="bi bi-clock me-1"></i>{{ item.waktu_absen|time:"H:i:s" }} WIB</div>
+                        </td>
+                        
+                        
+                        {% if role != 'teacher' %}
+                        <td>
+                            <span class="fw-bold text-dark">{{ item.guru.nama_lengkap|default:item.guru.username }}</span>
+                            <div class="font-xs text-secondary">{{ item.guru.username }}</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary-subtle text-secondary font-xs px-2 py-0.5 rounded-pill">{{ item.guru.branch|default:"BSD" }}</span>
+                        </td>
+                        {% endif %}
+                        
+                        
+                        <td>
+                            <div class="fw-bold text-dark">{{ item.jadwal.nama_kelas|default:"Tanpa Kelas" }}</div>
+                            <div class="font-xs text-secondary">{{ item.jadwal.sekolah.nama|default:"-" }}</div>
+                        </td>
+                        
+                        
+                        <td class="text-secondary font-sm">
+                            <i class="bi bi-calendar2-week me-1"></i>
+                            {{ item.jadwal.jam_mulai|time:"H:i" }} - {{ item.jadwal.jam_selesai|time:"H:i" }}
+                        </td>
+                        
+                        
+                        <td class="text-center">
+                            {% if item.status == 'Hadir' %}
+                                <span class="badge badge-hadir font-xs px-2.5 py-1 rounded-pill w-100 d-inline-block">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Hadir
+                                </span>
+                            {% else %}
+                                <span class="badge badge-terlambat font-xs px-2.5 py-1 rounded-pill w-100 d-inline-block">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Terlambat
+                                </span>
+                            {% endif %}
+                        </td>
+                        
+                        
+                        <td class="text-center {% if role == 'teacher' %}pe-4{% endif %}">
+                            {% if item.wajah_terdeteksi %}
+                                <span class="badge bg-success text-white font-xs px-2.5 py-1 rounded-pill">
+                                    <i class="bi bi-shield-check me-1"></i> Terverifikasi
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger text-white font-xs px-2.5 py-1 rounded-pill">
+                                    <i class="bi bi-shield-x me-1"></i> Gagal
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        
+                        {% if role != 'teacher' %}
+                        <td class="text-center pe-4">
+                            <form method="POST" action="{% url 'absensi_delete' item.id %}" data-confirm-title="Hapus Absensi" data-confirm-message="Apakah Anda yakin ingin menghapus absensi {{ item.guru.nama_lengkap|default:item.guru.username|escape }} pada kelas {{ item.jadwal.nama_kelas|default:'Tanpa Kelas'|escape }}?" data-confirm-button="Ya, Hapus" data-confirm-class="btn-danger" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-light btn-sm font-xs rounded border" title="Hapus Absensi">
+                                    <i class="bi bi-trash3 text-danger"></i>
+                                </button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{% if role == 'teacher' %}6{% else %}9{% endif %}" class="py-5 text-center text-muted">
+                            <div class="mb-2">
+                                <i class="bi bi-calendar-x text-secondary opacity-50" style="font-size: 3rem;"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark">Belum Ada Riwayat Absensi</h6>
+                            <p class="font-xs text-secondary mb-0">Data absensi wajah yang telah berhasil diverifikasi akan muncul di halaman ini.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'pagination.html' %}
+    </div>
+</div>
+
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header bg-teal text-white border-0 py-3">
+                <h6 class="modal-title fw-bold" id="photoModalLabel">Foto Verifikasi Wajah</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 bg-dark text-center">
+                <img id="modal-img" src="" class="img-fluid" alt="Detail Absensi" style="width: 100%; max-height: 500px; object-fit: contain;">
+            </div>
+            <div class="modal-footer bg-light border-0 py-2 d-flex justify-content-between">
+                <div class="text-start">
+                    <div class="fw-bold text-dark font-sm" id="modal-teacher">Guru</div>
+                    <div class="font-xs text-secondary" id="modal-class">Kelas</div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const photoModal = document.getElementById('photoModal');
+        photoModal.addEventListener('show.bs.modal', function(event) {
+            const image = event.relatedTarget;
+            const imgUrl = image.getAttribute('data-img-url');
+            const teacherName = image.getAttribute('data-teacher-name');
+            const className = image.getAttribute('data-class-name');
+            const modalImg = photoModal.querySelector('#modal-img');
+            const modalTeacher = photoModal.querySelector('#modal-teacher');
+            const modalClass = photoModal.querySelector('#modal-class');
+            
+            modalImg.src = imgUrl;
+            modalTeacher.innerHTML = `<i class="bi bi-person-fill text-teal me-1"></i> ${teacherName}`;
+            modalClass.innerHTML = `<i class="bi bi-journal-bookmark-fill text-teal me-1"></i> Kelas: ${className}`;
+        });
+    });
+</script>
+{% endblock %}

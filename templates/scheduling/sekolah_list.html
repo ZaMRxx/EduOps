@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Sekolah & Mitra - EduOps Educourse.id{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sekolah-main-card {
+        background-color: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+    
+    .card-header-clean {
+        background-color: #ffffff;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 16px 20px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .table-modern th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-top: none;
+    }
+    
+    .table-modern td {
+        font-size: 13px;
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold m-0 text-teal">Daftar Sekolah & Mitra</h4>
+            <p class="text-secondary font-sm mb-0">Kelola lokasi sekolah dan mitra pengajaran Educourse di seluruh cabang.</p>
+        </div>
+        {% if user.role == 'admin_op' or user.role == 'admin_branch' or user.role == 'admin_hr' %}
+        <div>
+            <a href="{% url 'sekolah_add' %}" class="btn btn-teal rounded-pill px-4 font-sm">
+                <i class="bi bi-plus-circle-fill me-1"></i> Tambah Sekolah/Mitra
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    
+    <div class="card sekolah-main-card">
+        <div class="card-header-clean d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="fw-bold m-0 text-dark">Daftar Sekolah / Mitra</h5>
+            
+            
+            <form method="GET" action="{% url 'sekolah_list' %}" class="d-flex" style="max-width: 300px; width: 100%;">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light text-secondary"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Cari nama sekolah, cabang..." value="{{ search_query }}">
+                    {% if search_query %}
+                    <a href="{% url 'sekolah_list' %}" class="btn btn-outline-secondary">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-modern align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">No</th>
+                            <th>Nama Sekolah</th>
+                            <th>Cabang / Branch</th>
+                            <th>Tipe</th>
+                            {% if user.role == 'admin_op' or user.role == 'admin_branch' or user.role == 'admin_hr' %}
+                            <th class="text-center pe-4">Aksi</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in sekolah_list %}
+                        <tr>
+                            
+                            <td class="ps-4 text-secondary">{{ forloop.counter }}</td>
+                            
+                            
+                            <td class="fw-bold text-dark">{{ s.nama }}</td>
+                            
+                            
+                            <td class="fw-semibold text-secondary">{{ s.branch }}</td>
+                            
+                            
+                            <td>
+                                {% if s.tipe == 'regular' %}
+                                <span class="badge bg-success-subtle text-success font-xs rounded-pill">Reguler</span>
+                                {% else %}
+                                <span class="badge bg-warning-subtle text-warning font-xs rounded-pill">Mitra</span>
+                                {% endif %}
+                            </td>
+                            
+                            
+                            {% if user.role == 'admin_op' or user.role == 'admin_branch' or user.role == 'admin_hr' %}
+                            <td class="text-center pe-4">
+                                <div class="d-flex justify-content-center gap-1">
+                                    <a href="{% url 'sekolah_edit' s.id %}" class="btn btn-light btn-sm font-xs rounded border" title="Edit Sekolah">
+                                        <i class="bi bi-pencil-square text-teal"></i>
+                                    </a>
+                                    
+                                    <form method="POST" action="{% url 'sekolah_delete' s.id %}" data-confirm-title="Hapus Sekolah/Mitra" data-confirm-message="Apakah Anda yakin ingin menghapus sekolah/mitra {{ s.nama|escape }}? Semua jadwal kelas yang terikat dengan sekolah ini akan terpengaruh." data-confirm-button="Ya, Hapus" data-confirm-class="btn-danger" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-light btn-sm font-xs rounded border" title="Hapus Sekolah">
+                                            <i class="bi bi-trash3 text-danger"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-5 text-center text-muted">
+                                <i class="bi bi-building opacity-50 mb-2" style="font-size: 2.5rem;"></i>
+                                <p class="font-sm mb-0">Tidak ada data sekolah atau mitra yang sesuai.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'pagination.html' %}
+        </div>
+    </div>
+    
+    
+    <div class="mt-3">
+        <a href="{% url 'schedule_view' %}" class="btn btn-outline-teal rounded-pill btn-sm px-4">
+            <i class="bi bi-arrow-left me-1"></i> Kembali ke Jadwal Kalender
+        </a>
+    </div>
+    
+</div>
+{% endblock %}

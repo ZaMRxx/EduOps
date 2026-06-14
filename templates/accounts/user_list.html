@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Manajemen Pengguna - EduOps Educourse.id{% endblock %}
+
+{% block extra_css %}
+<style>
+    .user-main-card {
+        background-color: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+    
+    .card-header-clean {
+        background-color: #ffffff;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 16px 20px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .table-modern th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-top: none;
+    }
+    
+    .table-modern td {
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .user-avatar {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        border-radius: 14px;
+        object-fit: cover;
+        background: rgba(8, 174, 179, 0.12);
+        color: var(--primary-teal);
+        border: 1px solid rgba(8, 174, 179, 0.18);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        object-fit: cover;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold m-0 text-teal">Manajemen Pengguna</h4>
+            <p class="text-secondary font-sm mb-0">Kelola kredensial, peran, dan detail cabang untuk seluruh pengguna sistem.</p>
+        </div>
+        {% if user.is_superuser or user.role == 'admin_op' %}
+        <div>
+            <a href="{% url 'admin_create_user' %}" class="btn btn-teal rounded-pill px-4 font-sm">
+                <i class="bi bi-person-plus-fill me-1"></i> Tambah Pengguna Baru
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    
+    <div class="card user-main-card">
+        <div class="card-header-clean d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="fw-bold m-0 text-dark">Daftar Pengguna</h5>
+            
+            
+            <form method="GET" action="{% url 'user_list' %}" class="d-flex" style="max-width: 300px; width: 100%;">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light text-secondary"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Cari nama, username, cabang..." value="{{ search_query }}">
+                    {% if search_query %}
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-modern align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Username</th>
+                            <th>Nama Lengkap & Email</th>
+                            <th>Peran / Role</th>
+                            <th>Cabang</th>
+                            <th>WhatsApp</th>
+                            <th class="text-center">Status</th>
+                            {% if user.is_superuser or user.role == 'admin_op' %}
+                            <th class="text-center pe-4">Aksi</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            
+                            <td class="ps-4 fw-bold text-dark">{{ u.username }}</td>
+                            
+                            
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="user-avatar">
+                                        {% if u.foto_profile %}
+                                        <img src="{{ u.foto_profile.url }}" alt="Foto {{ u.nama_lengkap|default:u.username }}">
+                                        {% else %}
+                                        {{ u.nama_lengkap|default:u.username|first }}
+                                        {% endif %}
+                                    </span>
+                                    <span class="min-w-0">
+                                        <div class="fw-semibold text-dark">{{ u.nama_lengkap }}</div>
+                                        <div class="text-secondary font-xs">{{ u.email|default:"Tidak ada email" }}</div>
+                                    </span>
+                                </div>
+                            </td>
+                            
+                            
+                            <td>
+                                {% if u.role == 'super_admin' %}
+                                <span class="badge bg-dark text-white font-xs rounded-pill">Super Admin</span>
+                                {% elif u.role == 'admin_op' %}
+                                <span class="badge bg-danger-subtle text-danger font-xs rounded-pill">Admin Operasional</span>
+                                {% elif u.role == 'admin_hr' %}
+                                <span class="badge bg-primary-subtle text-primary font-xs rounded-pill">Admin HR</span>
+                                {% elif u.role == 'admin_branch' %}
+                                <span class="badge bg-info-subtle text-info font-xs rounded-pill">Admin Cabang</span>
+                                {% else %}
+                                <span class="badge bg-success-subtle text-success font-xs rounded-pill">Pengajar</span>
+                                {% endif %}
+                            </td>
+                            
+                            
+                            <td class="text-secondary fw-semibold">{{ u.branch|default:"-" }}</td>
+                            
+                            
+                            <td>
+                                {% if u.no_wa %}
+                                <a href="https://wa.me/{{ u.no_wa }}" target="_blank" class="text-decoration-none text-dark">
+                                    <i class="bi bi-whatsapp text-success me-1"></i> {{ u.no_wa }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            
+                            
+                            <td class="text-center">
+                                {% if u.is_active %}
+                                <span class="badge bg-success text-white font-xs rounded-pill">Aktif</span>
+                                {% else %}
+                                <span class="badge bg-secondary text-white font-xs rounded-pill">Nonaktif</span>
+                                {% endif %}
+                            </td>
+                            
+                            
+                            {% if user.is_superuser or user.role == 'admin_op' %}
+                            <td class="text-center pe-4">
+                                <div class="d-flex justify-content-center gap-1">
+                                    <a href="{% url 'admin_edit_user' u.id %}" class="btn btn-light btn-sm font-xs rounded border" title="Edit Pengguna">
+                                        <i class="bi bi-pencil-square text-teal"></i>
+                                    </a>
+                                    
+                                    {% if u != request.user %}
+                                    <form method="POST" action="{% url 'admin_delete_user' u.id %}" data-confirm-title="Hapus Pengguna" data-confirm-message="Apakah Anda yakin ingin menghapus user {{ u.username|escape }} dari sistem? Semua data terkait user ini akan ikut terhapus." data-confirm-button="Ya, Hapus" data-confirm-class="btn-danger" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-light btn-sm font-xs rounded border" title="Hapus Pengguna">
+                                            <i class="bi bi-trash3 text-danger"></i>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <button class="btn btn-light btn-sm font-xs rounded border" disabled title="Tidak dapat menghapus diri sendiri">
+                                        <i class="bi bi-trash3 text-muted"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-5 text-center text-muted">
+                                <i class="bi bi-people opacity-50 mb-2" style="font-size: 2.5rem;"></i>
+                                <p class="font-sm mb-0">Tidak ada data pengguna yang sesuai.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'pagination.html' %}
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

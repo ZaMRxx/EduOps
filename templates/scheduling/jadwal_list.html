@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Jadwal Kelas - EduOps Educourse.id{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3">
+    
+    
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h4 class="fw-bold m-0 text-teal">
+                <i class="bi bi-calendar-range me-2"></i> Manajemen Jadwal Kelas
+            </h4>
+            <p class="text-secondary font-sm m-0">
+                {% if user.role == 'admin_branch' %}
+                    Menampilkan daftar jadwal kelas khusus Cabang <strong>{{ user.branch }}</strong>.
+                {% else %}
+                    Menampilkan seluruh daftar jadwal kelas di semua cabang.
+                {% endif %}
+            </p>
+        </div>
+        
+        
+        {% if user.role == 'admin_op' %}
+        <div>
+            <a href="{% url 'jadwal_add' %}" class="btn btn-teal rounded-pill px-4 font-sm fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Tambah Jadwal Baru
+            </a>
+        </div>
+        {% elif user.role == 'admin_branch' %}
+        
+        <div>
+            <a href="{% url 'request_list' %}" class="btn btn-outline-teal rounded-pill px-4 font-sm fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Ajukan Jadwal Baru
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    
+    <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white">
+        <div class="card-body p-3">
+            <form method="GET" action="{% url 'jadwal_list' %}" class="row g-2 align-items-center">
+                
+                <div class="col-md-4 col-12">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-secondary"></i></span>
+                        <input type="text" name="q" class="form-control bg-light border-start-0 font-sm" placeholder="Cari nama kelas atau guru..." value="{{ search_query }}">
+                    </div>
+                </div>
+                
+                
+                {% if user.role != 'admin_branch' %}
+                <div class="col-md-3 col-12">
+                    <select name="branch" class="form-select form-select-sm bg-light font-sm" onchange="this.form.submit()">
+                        <option value="">Semua Cabang / Branch</option>
+                        {% for br in all_branches %}
+                        <option value="{{ br }}" {% if branch_filter == br %}selected{% endif %}>{{ br }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                
+                
+                <div class="col-md-2 col-12">
+                    <select name="hari" class="form-select form-select-sm bg-light font-sm" onchange="this.form.submit()">
+                        <option value="">Semua Hari</option>
+                        {% for value,label in hari_choices %}
+                        <option value="{{ value }}" {% if hari_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2 col-12">
+                    <select name="tipe" class="form-select form-select-sm bg-light font-sm" onchange="this.form.submit()">
+                        <option value="">Semua Tipe</option>
+                        {% for t in all_tipes %}
+                        <option value="{{ t }}" {% if tipe_filter == t %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2 col-12">
+                    <select name="status" class="form-select form-select-sm bg-light font-sm" onchange="this.form.submit()">
+                        <option value="aktif" {% if status_filter == 'aktif' %}selected{% endif %}>Aktif</option>
+                        <option value="nonaktif" {% if status_filter == 'nonaktif' %}selected{% endif %}>Nonaktif</option>
+                        <option value="semua" {% if status_filter == 'semua' %}selected{% endif %}>Semua Status</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 col-12">
+                    <div class="form-check font-sm">
+                        <input class="form-check-input" type="checkbox" value="1" name="show_all" id="showAllDetail" {% if show_all %}checked{% endif %} onchange="this.form.submit()">
+                        <label class="form-check-label text-secondary" for="showAllDetail">Detail lengkap</label>
+                    </div>
+                </div>
+                
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-teal btn-sm px-4 rounded-pill">Filter</button>
+                    {% if search_query or branch_filter or tipe_filter or hari_filter or status_filter != 'aktif' or show_all %}
+                    <a href="{% url 'jadwal_list' %}" class="btn btn-light btn-sm px-3 rounded-pill text-secondary">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <div class="card shadow-sm border-0 rounded-4 mb-4 bg-white">
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold text-dark m-0">
+                        <i class="bi bi-bar-chart-fill text-teal me-2"></i> Load per Pengajar
+                    </h5>
+                    <p class="font-xs text-secondary m-0">Rumus: (jam mengajar x pertemuan per minggu) + (jam berangkat/pulang x kali ke sekolah).</p>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width: 900px;">
+                <thead class="table-light text-secondary font-sm fw-bold">
+                    <tr>
+                        <th class="ps-4">Pengajar</th>
+                        <th>Jadwal</th>
+                        <th>Total Jam Mengajar</th>
+                        <th>Total Pertemuan</th>
+                        <th>Kali ke Sekolah</th>
+                        <th>Load Mengajar</th>
+                        <th>Load Perjalanan</th>
+                        <th class="text-end pe-4">Total Load</th>
+                    </tr>
+                </thead>
+                <tbody class="font-sm">
+                    {% for item in teacher_loads %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ item.teacher.nama_lengkap|default:item.teacher.username }}</div>
+                            <span class="badge bg-secondary-subtle text-secondary font-xs rounded-pill px-2">Cabang: {{ item.teacher.branch|default:"Global" }}</span>
+                        </td>
+                        <td>{{ item.jumlah_jadwal }}</td>
+                        <td>{{ item.total_jam_mengajar|floatformat:2 }} jam</td>
+                        <td>{{ item.total_pertemuan }}x</td>
+                        <td>{{ item.total_kunjungan_sekolah }}x</td>
+                        <td>{{ item.total_load_mengajar|floatformat:2 }}</td>
+                        <td>{{ item.total_load_perjalanan|floatformat:2 }}</td>
+                        <td class="text-end pe-4">
+                            <span class="badge bg-teal text-white rounded-pill px-3 py-2">{{ item.total_load|floatformat:2 }}</span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted font-sm">Belum ada data load teacher untuk filter ini.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    
+    <div class="card shadow-sm border-0 rounded-4 bg-white overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width: 1250px;">
+                <thead class="table-light text-secondary font-sm fw-bold border-bottom py-3">
+                    <tr>
+                        <th class="ps-4">Nama Kelas</th>
+                        <th>Pengajar</th>
+                        <th>Sekolah / Lokasi</th>
+                        <th>Cabang</th>
+                        <th>Hari</th>
+                        <th>Jam Mengajar</th>
+                        <th>Load</th>
+                        <th>Tipe Perulangan</th>
+                        <th class="text-center">Status</th>
+                        {% if user.role != 'admin_hr' %}
+                        <th class="text-end pe-4">Aksi</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="font-sm">
+                    {% for jadwal in jadwal_list %}
+                    <tr>
+                        
+                        <td class="ps-4">
+                            <span class="fw-bold text-dark">{{ jadwal.nama_kelas }}</span>
+                            {% if show_all %}
+                            <div class="font-xs text-muted mt-0.5">Tipe: {{ jadwal.tipe }}</div>
+                            {% endif %}
+                        </td>
+                        
+                        
+                        <td>
+                            <span class="d-block fw-semibold text-dark">{{ jadwal.guru.nama_lengkap }}</span>
+                            <span class="badge bg-secondary-subtle text-secondary font-xs rounded-pill px-2">Cabang: {{ jadwal.guru.branch|default:"Global" }}</span>
+                        </td>
+                        
+                        
+                        <td>
+                            {% if jadwal.sekolah %}
+                                <span class="text-dark">{{ jadwal.sekolah.nama }}</span>
+                                {% if show_all %}
+                                <div class="font-xs text-muted">{{ jadwal.sekolah.get_tipe_display }}</div>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-secondary italic">Tanpa Sekolah Fisik</span>
+                            {% endif %}
+                        </td>
+                        
+                        
+                        <td>
+                            <span class="badge bg-secondary-subtle text-secondary font-xs rounded-pill px-2">
+                                {{ jadwal.sekolah.branch|default:jadwal.guru.branch|default:"Global" }}
+                            </span>
+                        </td>
+                        
+                        
+                        <td>
+                            <span class="fw-semibold text-teal bg-teal-light px-2.5 py-1 rounded">{{ jadwal.hari }}</span>
+                        </td>
+                        
+                        
+                        <td>
+                            <span class="text-dark fw-medium">{{ jadwal.jam_mulai|time:"H:i" }} - {{ jadwal.jam_selesai|time:"H:i" }}</span>
+                        </td>
+
+                        
+                        <td>
+                            <div class="fw-bold text-dark">{{ jadwal.nilai_load|floatformat:2 }}</div>
+                            {% if show_all %}
+                            <div class="font-xs text-muted">
+                                ({{ jadwal.durasi_jam_mengajar|floatformat:2 }}j x {{ jadwal.pertemuan_per_minggu }}) +
+                                ({{ jadwal.jam_berangkat_pulang|floatformat:2 }}j x {{ jadwal.kali_ke_sekolah_per_minggu }})
+                            </div>
+                            {% endif %}
+                        </td>
+                        
+                        
+                        <td>
+                            {% if jadwal.tipe_repeat == 'weekly' %}
+                                <span class="badge bg-teal-light text-teal border border-teal-light font-xs px-2.5 py-1">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Rutin Mingguan
+                                </span>
+                                {% if show_all and jadwal.tanggal_mulai_efektif %}
+                                    <div class="font-xs text-muted mt-1">Efektif: {{ jadwal.tanggal_mulai_efektif|date:"d M Y" }}</div>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle font-xs px-2.5 py-1">
+                                    <i class="bi bi-calendar-event me-1"></i> Sekali Saja
+                                </span>
+                                {% if show_all and jadwal.tanggal_spesifik %}
+                                    <div class="font-xs text-muted mt-1">Tanggal: {{ jadwal.tanggal_spesifik|date:"d M Y" }}</div>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        
+                        
+                        <td class="text-center">
+                            {% if jadwal.aktif %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
+                            {% else %}
+                                <span class="badge bg-light text-secondary border px-2.5 py-1"><i class="bi bi-slash-circle-fill me-1"></i> Nonaktif</span>
+                            {% endif %}
+                        </td>
+                        
+                        
+                        {% if user.role != 'admin_hr' %}
+                        <td class="text-end pe-4">
+                            <div class="d-inline-flex gap-1">
+                                
+                                <a href="{% url 'jadwal_edit' jadwal.id %}" class="btn btn-outline-teal btn-sm rounded-circle p-2" title="Edit Jadwal">
+                                    <i class="bi bi-pencil-fill" style="font-size: 13px;"></i>
+                                </a>
+                                
+                                
+                                <form method="POST" action="{% url 'jadwal_delete' jadwal.id %}" class="d-inline-block m-0" data-confirm-title="Hapus Jadwal" data-confirm-message="Apakah Anda yakin ingin menghapus jadwal kelas {{ jadwal.nama_kelas|escape }}?" data-confirm-button="Ya, Hapus" data-confirm-class="btn-danger">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-2" title="Hapus Jadwal">
+                                        <i class="bi bi-trash-fill" style="font-size: 13px;"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    
+                    <tr>
+                        <td colspan="{% if user.role != 'admin_hr' %}10{% else %}9{% endif %}" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x fs-1"></i>
+                            <p class="mt-2 font-sm">Tidak ditemukan jadwal kelas aktif.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include 'pagination.html' %}
+    </div>
+</div>
+{% endblock %}

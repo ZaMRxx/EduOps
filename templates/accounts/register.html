@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Guru Baru - EduOps Educourse.id{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center py-4" style="min-height: 80vh;">
+    <div class="card shadow-lg border-0" style="width: 100%; max-width: 550px; border-radius: 12px;">
+        <div class="card-body p-4 p-md-5">
+            
+            
+            <div class="text-center mb-4">
+                <i class="bi bi-mortarboard-fill text-teal" style="font-size: 3rem;"></i>
+                <h3 class="fw-bold tracking-tight text-teal mt-2">Daftar Guru Baru</h3>
+                <p class="text-secondary font-sm">Buat akun pengajar baru di sistem EduOps</p>
+            </div>
+            
+            
+            {% if form.errors %}
+            <div class="alert alert-danger font-sm border-0 shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Mohon perbaiki kesalahan di bawah ini.
+            </div>
+            {% endif %}
+            
+            
+            <form method="POST" action="{% url 'register_teacher' %}" class="needs-validation">
+                {% csrf_token %}
+                
+                <div class="row">
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_username" class="form-label font-xs fw-bold text-uppercase text-secondary">Username</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.username.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_email" class="form-label font-xs fw-bold text-uppercase text-secondary">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    
+                    <div class="col-md-12 mb-3">
+                        <label for="id_nama_lengkap" class="form-label font-xs fw-bold text-uppercase text-secondary">Nama Lengkap</label>
+                        {{ form.nama_lengkap }}
+                        {% if form.nama_lengkap.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.nama_lengkap.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_no_wa" class="form-label font-xs fw-bold text-uppercase text-secondary">Nomor WhatsApp</label>
+                        {{ form.no_wa }}
+                        {% if form.no_wa.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.no_wa.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_branch" class="form-label font-xs fw-bold text-uppercase text-secondary">Cabang / Branch</label>
+                        {{ form.branch }}
+                        {% if form.branch.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.branch.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                
+                <div class="mb-3">
+                    <label for="id_warna_kalender" class="form-label font-xs fw-bold text-uppercase text-secondary">Warna Tampilan Kalender</label>
+                    <div class="d-flex align-items-center gap-3">
+                        {{ form.warna_kalender }}
+                        <span class="font-xs text-secondary">Pilih warna penanda kartu jadwal Anda di Kalender Grid</span>
+                    </div>
+                    {% if form.warna_kalender.errors %}
+                    <div class="text-danger font-xs mt-1">{{ form.warna_kalender.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row">
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_password" class="form-label font-xs fw-bold text-uppercase text-secondary">Password</label>
+                        <div class="input-group">
+                            {{ form.password }}
+                            <button class="btn btn-light border toggle-password-btn" type="button" data-target="id_password" aria-label="Lihat password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_password_confirm" class="form-label font-xs fw-bold text-uppercase text-secondary">Konfirmasi Password</label>
+                        <div class="input-group">
+                            {{ form.password_confirm }}
+                            <button class="btn btn-light border toggle-password-btn" type="button" data-target="id_password_confirm" aria-label="Lihat password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password_confirm.errors %}
+                        <div class="text-danger font-xs mt-1">{{ form.password_confirm.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                
+                {% if form.non_field_errors %}
+                <div class="text-danger font-xs mb-3">{{ form.non_field_errors.0 }}</div>
+                {% endif %}
+
+                
+                <button type="submit" class="btn btn-teal w-100 rounded-pill py-2.5 fw-bold mt-2">
+                    <i class="bi bi-person-plus-fill me-1"></i> Daftar Sebagai Pengajar
+                </button>
+            </form>
+            
+            <div class="text-center mt-4 border-top pt-3">
+                <span class="text-secondary font-sm">Sudah punya akun? </span>
+                <a href="{% url 'login' %}" class="text-teal font-sm fw-bold text-decoration-none">Masuk di Sini</a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
