@@ -1,105 +1,135 @@
 import os
+import datetime
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eoas.settings')
 django.setup()
 
 from accounts.models import CustomUser
-from scheduling.models import Sekolah, JadwalKelas
-import datetime
+from attendance.models import Absensi, LogAktivitas
+from scheduling.models import JadwalKelas, RequestJadwal, Sekolah
 
-# 8 Branches
-branches = ['BSD', 'Bintaro', 'Bandung', 'Surabaya', 'Yogyakarta', 'Medan', 'Makassar', 'Semarang']
 
-# Create Sekolah for each branch
-sekolah_data = [
-    ('Educourse BSD', 'BSD', 'regular'),
-    ('Educourse Bintaro', 'Bintaro', 'regular'),
-    ('Educourse Bandung', 'Bandung', 'regular'),
-    ('Educourse Surabaya', 'Surabaya', 'regular'),
-    ('Educourse Yogyakarta', 'Yogyakarta', 'regular'),
-    ('Educourse Medan', 'Medan', 'mitra'),
-    ('Educourse Makassar', 'Makassar', 'mitra'),
-    ('Educourse Semarang', 'Semarang', 'regular'),
-]
-
-for nama, branch, tipe in sekolah_data:
-    Sekolah.objects.get_or_create(nama=nama, branch=branch, defaults={'tipe': tipe})
-
-# 10 Teachers
-teachers_data = [
-    ('teacher_bsd1', 'Ahmad Dani', 'BSD', '#FF5733', '081234567891'),
-    ('teacher_bintaro1', 'Siti Aminah', 'Bintaro', '#33FF57', '081234567892'),
-    ('teacher_bandung1', 'Budi Santoso', 'Bandung', '#3357FF', '081234567893'),
-    ('teacher_bandung2', 'Cici Paramida', 'Bandung', '#F3FF33', '081234567894'),
-    ('teacher_surabaya1', 'Dedi Cahyadi', 'Surabaya', '#FF33F3', '081234567895'),
-    ('teacher_surabaya2', 'Eliana Wijaya', 'Surabaya', '#33FFF0', '081234567896'),
-    ('teacher_jogja1', 'Fajar Pratama', 'Yogyakarta', '#FFAF33', '081234567897'),
-    ('teacher_medan1', 'Gita Gutawa', 'Medan', '#AF33FF', '081234567898'),
-    ('teacher_makassar1', 'Hadi Wijaya', 'Makassar', '#33FFAF', '081234567899'),
-    ('teacher_semarang1', 'Indah Permata', 'Semarang', '#E133FF', '081234567800'),
-]
-
-for username, nama_lengkap, branch, warna, no_wa in teachers_data:
-    user, created = CustomUser.objects.get_or_create(
+def create_user(username, email, password, nama_lengkap, role, branch='', is_staff=False, is_superuser=False, warna='#08aeb3'):
+    user = CustomUser.objects.create_user(
         username=username,
-        defaults={
-            'email': f'{username}@educourse.id',
-            'nama_lengkap': nama_lengkap,
-            'role': 'teacher',
-            'branch': branch,
-            'warna_kalender': warna,
-            'no_wa': no_wa,
-            'is_active': True
-        }
+        email=email,
+        password=password,
+        nama_lengkap=nama_lengkap,
+        role=role,
+        branch=branch,
+        warna_kalender=warna,
+        is_staff=is_staff,
+        is_superuser=is_superuser,
+        is_active=True,
     )
-    if created:
-        user.set_password('teacherpassword')
-        user.save()
-        print(f"Created teacher: {username}")
-    else:
-        print(f"Teacher already exists: {username}")
+    return user
 
-# Let's also create some dummy schedules for these teachers to make the grid look beautiful
-# For Thursday, June 11, 2026 (hari='Kamis')
-kamis_schedules = [
-    ('teacher_bsd1', 'Robotics Basic', '08:00', '10:00', 'Educourse BSD', 'offline'),
-    ('teacher_bintaro1', 'Coding Kids', '09:00', '11:00', 'Educourse Bintaro', 'offline'),
-    ('teacher_bandung1', 'Scratch Jr', '10:00', '12:00', 'Educourse Bandung', 'offline'),
-    ('teacher_bandung2', 'Web Development', '13:00', '15:00', 'Educourse Bandung', 'online'),
-    ('teacher_surabaya1', 'Python Advanced', '14:00', '16:00', 'Educourse Surabaya', 'offline'),
-    ('teacher_surabaya2', 'Game Dev Unity', '08:30', '10:30', 'Educourse Surabaya', 'online'),
-    ('teacher_jogja1', 'AI for Kids', '11:00', '13:00', 'Educourse Yogyakarta', 'offline'),
-    ('teacher_medan1', 'Design thinking', '09:00', '11:00', 'Educourse Medan', 'offline'),
-    ('teacher_makassar1', 'Arduino IoT', '15:00', '17:00', 'Educourse Makassar', 'offline'),
-    ('teacher_semarang1', 'STEM Project', '10:30', '12:30', 'Educourse Semarang', 'offline'),
+
+def make_time(value):
+    return datetime.datetime.strptime(value, '%H:%M').time()
+
+
+print('Resetting demo data...')
+Absensi.objects.all().delete()
+LogAktivitas.objects.all().delete()
+RequestJadwal.objects.all().delete()
+JadwalKelas.objects.all().delete()
+Sekolah.objects.all().delete()
+CustomUser.objects.all().delete()
+
+print('Creating users...')
+superadmin = create_user(
+    'superadmin',
+    'superadmin@educourse.id',
+    'Superadmin123!',
+    'Super Admin EduOps',
+    'super_admin',
+    is_staff=True,
+    is_superuser=True,
+    warna='#111827',
+)
+admin_op = create_user(
+    'admin.ops',
+    'admin.ops@educourse.id',
+    'AdminOps123!',
+    'Admin Operasional',
+    'admin_op',
+    warna='#08aeb3',
+)
+admin_branch = create_user(
+    'admin.bsd',
+    'admin.bsd@educourse.id',
+    'AdminBsd123!',
+    'Admin Branch BSD',
+    'admin_branch',
+    'BSD',
+    warna='#22c55e',
+)
+teachers = [
+    create_user('teacher.ahmad', 'ahmad@educourse.id', 'Teacher123!', 'Ahmad Muhajir', 'teacher', 'BSD', warna='#12b3a8'),
+    create_user('teacher.anisa', 'anisa@educourse.id', 'Teacher123!', 'Anisa Fitriyani', 'teacher', 'Bintaro', warna='#f6c44f'),
+    create_user('teacher.cici', 'cici@educourse.id', 'Teacher123!', 'Cici Paramida', 'teacher', 'Bandung', warna='#a78bfa'),
+    create_user('teacher.hadi', 'hadi@educourse.id', 'Teacher123!', 'Hadi Wijaya', 'teacher', 'Surabaya', warna='#2dd4bf'),
 ]
 
-for username, nama_kelas, jam_mulai_str, jam_selesai_str, sekolah_nama, mode in kamis_schedules:
-    try:
-        guru = CustomUser.objects.get(username=username)
-        sekolah = Sekolah.objects.get(nama=sekolah_nama)
-        
-        jam_mulai = datetime.datetime.strptime(jam_mulai_str, '%H:%M').time()
-        jam_selesai = datetime.datetime.strptime(jam_selesai_str, '%H:%M').time()
-        
-        JadwalKelas.objects.get_or_create(
-            guru=guru,
-            sekolah=sekolah,
-            nama_kelas=nama_kelas,
-            hari='Kamis',
-            jam_mulai=jam_mulai,
-            jam_selesai=jam_selesai,
-            defaults={
-                'mode': mode,
-                'tipe': 'regular',
-                'kegiatan': 'mengajar',
-                'aktif': True,
-                'tipe_repeat': 'weekly',
-            }
-        )
-        print(f"Created schedule: {nama_kelas} for {username}")
-    except Exception as e:
-        print(f"Error creating schedule for {username}: {e}")
+print('Creating schools...')
+schools = {
+    'bsd': Sekolah.objects.create(nama='Educourse BSD', branch='BSD', tipe='regular'),
+    'bintaro': Sekolah.objects.create(nama='Educourse Bintaro', branch='Bintaro', tipe='regular'),
+    'bandung': Sekolah.objects.create(nama='Educourse Bandung', branch='Bandung', tipe='regular'),
+    'surabaya': Sekolah.objects.create(nama='Educourse Surabaya', branch='Surabaya', tipe='mitra'),
+}
 
-print("Seeding completed successfully!")
+print('Creating schedules...')
+schedules = [
+    (teachers[0], schools['bsd'], 'Scratch Junior', 'Senin', '08:00', '09:30', 'offline', 'mengajar', 'Reguler'),
+    (teachers[0], schools['bsd'], 'Robotics Beginner', 'Minggu', '10:00', '11:30', 'offline', 'mengajar', 'Reguler'),
+    (teachers[1], schools['bintaro'], 'Creative Coding', 'Rabu', '15:00', '16:30', 'offline', 'asistensi', 'Reguler'),
+    (teachers[1], schools['bintaro'], 'Mobile App Kids', 'Jumat', '18:30', '20:00', 'online', 'mengajar', 'Event'),
+    (teachers[2], schools['bandung'], 'AI Kids Explorer', 'Minggu', '13:00', '14:30', 'offline', 'mengajar', 'Reguler'),
+    (teachers[3], schools['surabaya'], 'STEM Project Class', 'Selasa', '14:00', '16:00', 'offline', 'mengajar', 'Workshop'),
+]
+
+for guru, sekolah, nama_kelas, hari, jam_mulai, jam_selesai, mode, kegiatan, tipe in schedules:
+    JadwalKelas.objects.create(
+        guru=guru,
+        sekolah=sekolah,
+        nama_kelas=nama_kelas,
+        hari=hari,
+        jam_mulai=make_time(jam_mulai),
+        jam_selesai=make_time(jam_selesai),
+        mode=mode,
+        kegiatan=kegiatan,
+        tipe=tipe,
+        tipe_repeat='weekly',
+        pertemuan_per_minggu=1,
+        jam_berangkat_pulang=1,
+        kali_ke_sekolah_per_minggu=1 if mode == 'offline' else 0,
+        aktif=True,
+    )
+
+RequestJadwal.objects.create(
+    pengaju=teachers[0],
+    tipe_request='add',
+    guru=teachers[0],
+    sekolah=schools['bsd'],
+    nama_kelas='Coding Trial Class',
+    hari='Kamis',
+    jam_mulai=make_time('16:00'),
+    jam_selesai=make_time('17:30'),
+    mode='offline',
+    kegiatan='mengajar',
+    tipe='Trial',
+    status='pending',
+)
+
+print('Seed completed.')
+print('')
+print('Login credentials:')
+print('Super Admin  : superadmin@educourse.id / Superadmin123!')
+print('Admin Op     : admin.ops@educourse.id / AdminOps123!')
+print('Admin Branch : admin.bsd@educourse.id / AdminBsd123!')
+print('Teachers     : ahmad@educourse.id, anisa@educourse.id, cici@educourse.id, hadi@educourse.id / Teacher123!')
+print('')
+print(f'Superuser check: {superadmin.username} role={superadmin.role} is_superuser={superadmin.is_superuser}')
