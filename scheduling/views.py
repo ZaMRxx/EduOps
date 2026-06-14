@@ -210,7 +210,10 @@ def jadwal_list(request):
             Q(nama_kelas__icontains=search) | 
             Q(guru__nama_lengkap__icontains=search) | 
             Q(guru__username__icontains=search) |
-            Q(sekolah__nama__icontains=search)
+            Q(guru__branch__icontains=search) |
+            Q(sekolah__nama__icontains=search) |
+            Q(sekolah__branch__icontains=search) |
+            Q(sekolah__tipe__icontains=search)
         )
     branch_filter = request.GET.get('branch', '')
     if branch_filter:

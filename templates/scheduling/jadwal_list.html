@@ -45,7 +45,7 @@
                 <div class="col-md-4 col-12">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-secondary"></i></span>
-                        <input type="text" name="q" class="form-control bg-light border-start-0 font-sm" placeholder="Cari nama kelas atau guru..." value="{{ search_query }}">
+                        <input type="text" name="q" class="form-control bg-light border-start-0 font-sm" placeholder="Cari kelas, guru, sekolah, cabang..." value="{{ search_query }}">
                     </div>
                 </div>
                 
@@ -275,8 +275,8 @@
                                 
                                 <form method="POST" action="{% url 'jadwal_delete' jadwal.id %}" class="d-inline-block m-0" data-confirm-title="Hapus Jadwal" data-confirm-message="Apakah Anda yakin ingin menghapus jadwal kelas {{ jadwal.nama_kelas|escape }}?" data-confirm-button="Ya, Hapus" data-confirm-class="btn-danger">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-2" title="Hapus Jadwal">
-                                        <i class="bi bi-trash-fill" style="font-size: 13px;"></i>
+                                    <button type="submit" class="btn btn-light btn-sm font-xs rounded border" title="Hapus Jadwal">
+                                        <i class="bi bi-trash3 text-danger"></i>
                                     </button>
                                 </form>
                             </div>

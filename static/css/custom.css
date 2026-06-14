@@ -275,6 +275,42 @@ body {
     border-radius: 14px;
 }
 
+.form-select {
+    min-height: 42px;
+    padding: 0.58rem 2.45rem 0.58rem 0.95rem;
+    font-weight: 650;
+    color: #344054;
+    background-color: #ffffff;
+    border: 1px solid rgba(8, 174, 179, 0.14);
+    box-shadow: 0 8px 18px rgba(7, 21, 47, 0.04);
+    cursor: pointer;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.form-select-sm {
+    min-height: 36px;
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+    font-size: 0.82rem;
+}
+
+.form-select:hover {
+    border-color: rgba(8, 174, 179, 0.36);
+    background-color: #fbffff;
+}
+
+.form-select:focus {
+    border-color: var(--primary-teal);
+    box-shadow: 0 0 0 0.22rem rgba(8, 174, 179, 0.14);
+}
+
+.form-select:disabled {
+    cursor: not-allowed;
+    color: #98a2b3;
+    background-color: #f4f7f8;
+    box-shadow: none;
+}
+
 .input-group .form-control,
 .input-group .input-group-text,
 .input-group .btn {
