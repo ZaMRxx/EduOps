@@ -45,7 +45,7 @@
             <h4 class="fw-bold m-0 text-teal">Daftar Sekolah & Mitra</h4>
             <p class="text-secondary font-sm mb-0">Kelola lokasi sekolah dan mitra pengajaran Educourse di seluruh cabang.</p>
         </div>
-        {% if user.role == 'admin_op' or user.role == 'admin_branch' or user.role == 'admin_hr' %}
+        {% if user.is_superuser or user.role == 'admin_op' or user.role == 'admin_branch' or user.role == 'admin_hr' %}
         <div>
             <a href="{% url 'sekolah_add' %}" class="btn btn-teal rounded-pill px-4 font-sm">
                 <i class="bi bi-plus-circle-fill me-1"></i> Tambah Sekolah/Mitra
@@ -80,7 +80,7 @@
                             <th>Nama Sekolah</th>
                             <th>Cabang / Branch</th>
                             <th>Tipe</th>
-                            {% if user.role == 'admin_op' or user.role == 'admin_branch' or user.role == 'admin_hr' %}
+                            {% if user.is_superuser or user.role == 'admin_op' or user.role == 'admin_branch' or user.role == 'admin_hr' %}
                             <th class="text-center pe-4">Aksi</th>
                             {% endif %}
                         </tr>
@@ -107,16 +107,16 @@
                             </td>
                             
                             
-                            {% if user.role == 'admin_op' or user.role == 'admin_branch' or user.role == 'admin_hr' %}
+                            {% if user.is_superuser or user.role == 'admin_op' or user.role == 'admin_branch' or user.role == 'admin_hr' %}
                             <td class="text-center pe-4">
                                 <div class="d-flex justify-content-center gap-1">
-                                    <a href="{% url 'sekolah_edit' s.id %}" class="btn btn-light btn-sm font-xs rounded border" title="Edit Sekolah">
+                                    <a href="{% url 'sekolah_edit' s.id %}" class="btn btn-light btn-sm font-xs rounded border table-action-btn" title="Edit Sekolah">
                                         <i class="bi bi-pencil-square text-teal"></i>
                                     </a>
                                     
                                     <form method="POST" action="{% url 'sekolah_delete' s.id %}" data-confirm-title="Hapus Sekolah/Mitra" data-confirm-message="Apakah Anda yakin ingin menghapus sekolah/mitra {{ s.nama|escape }}? Semua jadwal kelas yang terikat dengan sekolah ini akan terpengaruh." data-confirm-button="Ya, Hapus" data-confirm-class="btn-danger" style="display: inline;">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-light btn-sm font-xs rounded border" title="Hapus Sekolah">
+                                        <button type="submit" class="btn btn-light btn-sm font-xs rounded border table-action-btn" title="Hapus Sekolah">
                                             <i class="bi bi-trash3 text-danger"></i>
                                         </button>
                                     </form>
